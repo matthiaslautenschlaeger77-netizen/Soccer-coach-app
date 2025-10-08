@@ -1,92 +1,646 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Soccer Coach App</title>
+    <title>Soccer Coach Playing Time Tracker</title>
     <style>
-        body { 
-            font-family: Arial; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .player { 
-            background: #f0f0f0; 
-            padding: 10px; 
-            margin: 5px; 
-            border-radius: 5px; 
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
-        button { 
-            background: #2ecc71; 
-            color: white; 
-            border: none; 
-            padding: 10px 15px; 
-            margin: 5px; 
-            border-radius: 5px; 
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .player-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .player-info {
+            flex-grow: 1;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .player-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .skill-input {
+            width: 60px;
+            text-align: center;
+        }
+        
+        .remove-btn {
+            background: #e74c3c;
+            padding: 8px 12px;
+        }
+        
+        .time-distribution {
+            margin-top: 1rem;
+        }
+        
+        .time-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .time-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .time-bar {
+            background: #ecf0f1;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .time-fill {
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .simulation-container {
+            background: #2c3e50;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        
+        .game-progress {
+            background: #34495e;
+            height: 20px;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            height: 100%;
+            transition: width 0.3s;
+        }
+        
+        .simulation-log {
+            height: 200px;
+            overflow-y: auto;
+            background: #1a252f;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.3rem;
+            border-radius: 3px;
+        }
+        
+        .log-entry.substitution {
+            background: rgba(52, 152, 219, 0.2);
+            border-left: 3px solid #3498db;
+        }
+        
+        .log-entry.suggestion {
+            background: rgba(241, 196, 15, 0.2);
+            border-left: 3px solid #f1c40f;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-card {
+            background: #34495e;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <h1>⚽ Soccer Coach Playing Time Tracker</h1>
-    
-    <div>
-        <h2>Game Type:</h2>
-        <select id="gameType">
-            <option value="7v7">7v7 (50 min)</option>
-            <option value="9v9">9v9 (70 min)</option>
-            <option value="11v11">11v11 (90 min)</option>
-        </select>
-    </div>
-
-    <div>
-        <h2>Players:</h2>
-        <div id="players">
-            <div class="player">Player 1 <button onclick="removePlayer(this)">Remove</button></div>
-            <div class="player">Player 2 <button onclick="removePlayer(this)">Remove</button></div>
+    <div class="container">
+        <header>
+            <h1>⚽ Soccer Coach Playing Time Tracker</h1>
+            <p class="subtitle">Smart playing time distribution and game simulation</p>
+        </header>
+        
+        <div class="dashboard">
+            <!-- Left Column -->
+            <div>
+                <!-- Game Setup Card -->
+                <div class="card">
+                    <h2>Game Setup</h2>
+                    <div class="form-group">
+                        <label for="gameType">Game Format:</label>
+                        <select id="gameType">
+                            <option value="7v7">7v7 (50 minutes)</option>
+                            <option value="9v9">9v9 (70 minutes)</option>
+                            <option value="11v11" selected>11v11 (90 minutes)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="formation">Formation:</label>
+                        <select id="formation">
+                            <option value="4-4-2">4-4-2</option>
+                            <option value="4-3-3">4-3-3</option>
+                            <option value="4-2-3-1">4-2-3-1</option>
+                            <option value="3-5-2">3-5-2</option>
+                            <option value="4-1-4-1">4-1-4-1</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Players Card -->
+                <div class="card">
+                    <h2>Team Roster</h2>
+                    <div class="player-list" id="playersList">
+                        <!-- Players will be added here dynamically -->
+                    </div>
+                    <button onclick="addPlayer()">➕ Add Player</button>
+                    <button onclick="addSampleTeam()">🎯 Add Sample Team</button>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div>
+                <!-- Playing Time Rules Card -->
+                <div class="card">
+                    <h2>Playing Time Rules</h2>
+                    <div class="form-group">
+                        <label for="minPercentage">Minimum Playing Time (%):</label>
+                        <input type="range" id="minPercentage" min="0" max="100" value="50" oninput="updatePercentageValue()">
+                        <span id="percentageValue">50%</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priorityPlayers">Priority Players (get more time):</label>
+                        <select id="priorityPlayers" multiple style="height: 100px;">
+                            <!-- Will be populated dynamically -->
+                        </select>
+                        <small>Hold Ctrl/Cmd to select multiple players</small>
+                    </div>
+                    
+                    <button onclick="calculatePlayingTime()">🎮 Calculate Playing Time</button>
+                    <button onclick="startSimulation()">⚡ Simulate Game (10x speed)</button>
+                </div>
+                
+                <!-- Results Card -->
+                <div class="card">
+                    <h2>Playing Time Distribution</h2>
+                    <div id="results">
+                        <p style="text-align: center; color: #7f8c8d; padding: 2rem;">
+                            Configure your team and rules, then click "Calculate Playing Time"
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <button onclick="addPlayer()">Add Player</button>
-    </div>
-
-    <div>
-        <h2>Calculate Playing Time:</h2>
-        <button onclick="calculateTime()">Calculate 50% Minimum</button>
-        <div id="results"></div>
+        
+        <!-- Simulation Card -->
+        <div class="card">
+            <h2>Game Simulation & Suggestions</h2>
+            <div id="simulationContainer">
+                <p style="text-align: center; color: #7f88d; padding: 1rem;">
+                    Start simulation to see substitution patterns and get AI suggestions
+                </p>
+            </div>
+        </div>
     </div>
 
     <script>
-        let playerCount = 2;
+        // Player management
+        let players = [];
+        let nextId = 1;
+        
+        // Game configuration
+        const gameConfig = {
+            '7v7': { duration: 50, playersOnField: 7 },
+            '9v9': { duration: 70, playersOnField: 9 },
+            '11v11': { duration: 90, playersOnField: 11 }
+        };
+        
+        // Initialize with sample players
+        function initializeSampleTeam() {
+            const sampleNames = [
+                "Alex Johnson", "Ben Smith", "Carlos Rodriguez", "David Lee", 
+                "Ethan Wilson", "Frank Miller", "George Brown", "Henry Davis",
+                "Ian Moore", "Jack Taylor", "Kevin Anderson", "Liam Thomas"
+            ];
+            
+            players = sampleNames.map((name, index) => ({
+                id: index + 1,
+                name: name,
+                skill: Math.floor(Math.random() * 5) + 6, // 6-10
+                position: index < 11 ? "Field" : "Substitute",
+                assignedMinutes: 0
+            }));
+            
+            nextId = players.length + 1;
+            displayPlayers();
+            updatePrioritySelect();
+        }
         
         function addPlayer() {
-            playerCount++;
-            const newPlayer = document.createElement('div');
-            newPlayer.className = 'player';
-            newPlayer.innerHTML = `Player ${playerCount} <button onclick="removePlayer(this)">Remove</button>`;
-            document.getElementById('players').appendChild(newPlayer);
+            const newPlayer = {
+                id: nextId++,
+                name: `Player ${nextId - 1}`,
+                skill: 5,
+                position: "Field",
+                assignedMinutes: 0
+            };
+            
+            players.push(newPlayer);
+            displayPlayers();
+            updatePrioritySelect();
         }
         
-        function removePlayer(button) {
-            button.parentElement.remove();
+        function addSampleTeam() {
+            initializeSampleTeam();
         }
         
-        function calculateTime() {
+        function removePlayer(id) {
+            players = players.filter(player => player.id !== id);
+            displayPlayers();
+            updatePrioritySelect();
+        }
+        
+        function updatePlayerSkill(id, skill) {
+            const player = players.find(p => p.id === id);
+            if (player) {
+                player.skill = parseInt(skill);
+            }
+        }
+        
+        function displayPlayers() {
+            const list = document.getElementById('playersList');
+            list.innerHTML = '';
+            
+            players.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-item';
+                playerDiv.innerHTML = `
+                    <div class="player-info">
+                        <div class="player-name">${player.name}</div>
+                        <small>Skill: ${player.skill}/10</small>
+                    </div>
+                    <div class="player-controls">
+                        <label>Skill:
+                            <input type="number" class="skill-input" value="${player.skill}" min="1" max="10" 
+                                   onchange="updatePlayerSkill(${player.id}, this.value)">
+                        </label>
+                        <button class="remove-btn" onclick="removePlayer(${player.id})">Remove</button>
+                    </div>
+                `;
+                list.appendChild(playerDiv);
+            });
+        }
+        
+        function updatePrioritySelect() {
+            const select = document.getElementById('priorityPlayers');
+            select.innerHTML = '';
+            
+            players.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.id;
+                option.textContent = player.name;
+                select.appendChild(option);
+            });
+        }
+        
+        function updatePercentageValue() {
+            const slider = document.getElementById('minPercentage');
+            const valueSpan = document.getElementById('percentageValue');
+            valueSpan.textContent = slider.value + '%';
+        }
+        
+        // Playing time calculation algorithm
+        function calculatePlayingTime() {
             const gameType = document.getElementById('gameType').value;
-            let totalMinutes = 90;
-            if (gameType === '7v7') totalMinutes = 50;
-            if (gameType === '9v9') totalMinutes = 70;
+            const minPercentage = parseInt(document.getElementById('minPercentage').value);
+            const prioritySelect = document.getElementById('priorityPlayers');
+            const priorityPlayers = Array.from(prioritySelect.selectedOptions).map(opt => parseInt(opt.value));
             
-            const playerElements = document.getElementsByClassName('player');
-            const playersOnField = gameType === '7v7' ? 7 : gameType === '9v9' ? 9 : 11;
-            const totalPlayerMinutes = playersOnField * totalMinutes;
+            const config = gameConfig[gameType];
+            const totalAvailableMinutes = config.playersOnField * config.duration;
             
-            const minPlayingTime = Math.floor(totalMinutes * 0.5);
+            // Reset assigned minutes
+            players.forEach(player => player.assignedMinutes = 0);
             
-            document.getElementById('results').innerHTML = `
-                <h3>Results:</h3>
-                <p>Each player gets at least <strong>${minPlayingTime} minutes</strong></p>
-                <p>Total players: ${playerElements.length}</p>
-                <p>Players on field: ${playersOnField}</p>
-                <p>Total available minutes: ${totalPlayerMinutes}</p>
-            `;
+            // Calculate minimum minutes for each player
+            const minMinutes = Math.floor(config.duration * (minPercentage / 100));
+            
+            // Phase 1: Assign minimum minutes to all players
+            let totalAssigned = 0;
+            players.forEach(player => {
+                player.assignedMinutes = minMinutes;
+                totalAssigned += minMinutes;
+            });
+            
+            // Phase 2: Distribute remaining minutes to priority players
+            let remainingMinutes = totalAvailableMinutes - totalAssigned;
+            const priorityList = players.filter(p => priorityPlayers.includes(p.id));
+            const nonPriorityList = players.filter(p => !priorityPlayers.includes(p.id));
+            
+            // Distribute to priority players first
+            let index = 0;
+            while (remainingMinutes > 0 && priorityList.length > 0) {
+                const player = priorityList[index % priorityList.length];
+                if (player.assignedMinutes < config.duration) {
+                    player.assignedMinutes++;
+                    remainingMinutes--;
+                }
+                index++;
+                
+                // Remove from list if reached max
+                if (player.assignedMinutes >= config.duration) {
+                    const playerIndex = priorityList.indexOf(player);
+                    if (playerIndex > -1) {
+                        priorityList.splice(playerIndex, 1);
+                    }
+                }
+            }
+            
+            // Distribute any remaining minutes to non-priority players
+            index = 0;
+            while (remainingMinutes > 0 && nonPriorityList.length > 0) {
+                const player = nonPriorityList[index % nonPriorityList.length];
+                if (player.assignedMinutes < config.duration) {
+                    player.assignedMinutes++;
+                    remainingMinutes--;
+                }
+                index++;
+                
+                if (player.assignedMinutes >= config.duration) {
+                    const playerIndex = nonPriorityList.indexOf(player);
+                    if (playerIndex > -1) {
+                        nonPriorityList.splice(playerIndex, 1);
+                    }
+                }
+            }
+            
+            displayResults();
         }
+        
+        function displayResults() {
+            const gameType = document.getElementById('gameType').value;
+            const config = gameConfig[gameType];
+            
+            let resultsHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value">${players.length}</div>
+                        <div class="stat-label">Total Players</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${config.playersOnField}</div>
+                        <div class="stat-label">On Field</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${config.duration}</div>
+                        <div class="stat-label">Game Minutes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${config.playersOnField * config.duration}</div>
+                        <div class="stat-label">Total Minutes</div>
+                    </div>
+                </div>
+                <div class="time-distribution">
+            `;
+            
+            players.forEach(player => {
+                const percentage = Math.round((player.assignedMinutes / config.duration) * 100);
+                resultsHTML += `
+                    <div class="time-item">
+                        <div class="time-header">
+                            <strong>${player.name}</strong>
+                            <span>${player.assignedMinutes} min (${percentage}%)</span>
+                        </div>
+                        <div class="time-bar">
+                            <div class="time-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsHTML += `</div>`;
+            document.getElementById('results').innerHTML = resultsHTML;
+        }
+        
+        // Game simulation
+        function startSimulation() {
+            const gameType = document.getElementById('gameType').value;
+            const config = gameConfig[gameType];
+            
+            const simulationHTML = `
+                <div class="simulation-container">
+                    <div class="game-progress">
+                        <div class="progress-fill" id="gameProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="simulation-log" id="simulationLog"></div>
+                </div>
+            `;
+            
+            document.getElementById('simulationContainer').innerHTML = simulationHTML;
+            
+            const log = document.getElementById('simulationLog');
+            const progress = document.getElementById('gameProgress');
+            
+            let currentMinute = 0;
+            const totalMinutes = config.duration;
+            
+            log.innerHTML = '<div class="log-entry">🚀 Simulation started at 10x speed...</div>';
+            
+            const interval = setInterval(() => {
+                currentMinute++;
+                const percentage = (currentMinute / totalMinutes) * 100;
+                progress.style.width = percentage + '%';
+                
+                // Game events
+                if (currentMinute === 1) {
+                    log.innerHTML += `<div class="log-entry">⏰ Minute ${currentMinute}: Game started!</div>`;
+                }
+                
+                // Substitution opportunities
+                if (currentMinute === 25 || currentMinute === 50 || currentMinute === 70) {
+                    log.innerHTML += `<div class="log-entry substitution">🔄 Minute ${currentMinute}: Substitution opportunity</div>`;
+                }
+                
+                // AI suggestions
+                if (currentMinute === 30) {
+                    log.innerHTML += `<div class="log-entry suggestion">💡 Suggestion: Consider substituting ${players[0]?.name} to manage fatigue</div>`;
+                }
+                
+                if (currentMinute === 60) {
+                    const lowTimePlayers = players.filter(p => p.assignedMinutes < 30 && currentMinute > 60);
+                    if (lowTimePlayers.length > 0) {
+                        log.innerHTML += `<div class="log-entry suggestion">💡 Suggestion: ${lowTimePlayers[0]?.name} needs more playing time to reach target</div>`;
+                    }
+                }
+                
+                // Regular game updates
+                if (currentMinute % 10 === 0) {
+                    log.innerHTML += `<div class="log-entry">⏱️ Minute ${currentMinute}: Game in progress...</div>`;
+                }
+                
+                log.scrollTop = log.scrollHeight;
+                
+                // End simulation
+                if (currentMinute >= totalMinutes) {
+                    clearInterval(interval);
+                    log.innerHTML += `<div class="log-entry">🎉 Final whistle! Game completed.</div>`;
+                    log.innerHTML += `<div class="log-entry suggestion">📊 All players received their target playing time</div>`;
+                }
+            }, 300); // 300ms = ~10x speed
+            
+            // Add formation visualization after a delay
+            setTimeout(() => {
+                log.innerHTML += `<div class="log-entry">🏟️ Formation: ${document.getElementById('formation').value} active</div>`;
+            }, 1000);
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSampleTeam();
+            updatePercentageValue();
+        });
     </script>
 </body>
 </html>
