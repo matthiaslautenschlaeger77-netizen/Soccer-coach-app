@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Soccer Coach App</title>
+    <style>
+        body { 
+            font-family: Arial; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .player { 
+            background: #f0f0f0; 
+            padding: 10px; 
+            margin: 5px; 
+            border-radius: 5px; 
+        }
+        button { 
+            background: #2ecc71; 
+            color: white; 
+            border: none; 
+            padding: 10px 15px; 
+            margin: 5px; 
+            border-radius: 5px; 
+        }
+    </style>
+</head>
+<body>
+    <h1>⚽ Soccer Coach Playing Time Tracker</h1>
+    
+    <div>
+        <h2>Game Type:</h2>
+        <select id="gameType">
+            <option value="7v7">7v7 (50 min)</option>
+            <option value="9v9">9v9 (70 min)</option>
+            <option value="11v11">11v11 (90 min)</option>
+        </select>
+    </div>
+
+    <div>
+        <h2>Players:</h2>
+        <div id="players">
+            <div class="player">Player 1 <button onclick="removePlayer(this)">Remove</button></div>
+            <div class="player">Player 2 <button onclick="removePlayer(this)">Remove</button></div>
+        </div>
+        <button onclick="addPlayer()">Add Player</button>
+    </div>
+
+    <div>
+        <h2>Calculate Playing Time:</h2>
+        <button onclick="calculateTime()">Calculate 50% Minimum</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let playerCount = 2;
+        
+        function addPlayer() {
+            playerCount++;
+            const newPlayer = document.createElement('div');
+            newPlayer.className = 'player';
+            newPlayer.innerHTML = `Player ${playerCount} <button onclick="removePlayer(this)">Remove</button>`;
+            document.getElementById('players').appendChild(newPlayer);
+        }
+        
+        function removePlayer(button) {
+            button.parentElement.remove();
+        }
+        
+        function calculateTime() {
+            const gameType = document.getElementById('gameType').value;
+            let totalMinutes = 90;
+            if (gameType === '7v7') totalMinutes = 50;
+            if (gameType === '9v9') totalMinutes = 70;
+            
+            const playerElements = document.getElementsByClassName('player');
+            const playersOnField = gameType === '7v7' ? 7 : gameType === '9v9' ? 9 : 11;
+            const totalPlayerMinutes = playersOnField * totalMinutes;
+            
+            const minPlayingTime = Math.floor(totalMinutes * 0.5);
+            
+            document.getElementById('results').innerHTML = `
+                <h3>Results:</h3>
+                <p>Each player gets at least <strong>${minPlayingTime} minutes</strong></p>
+                <p>Total players: ${playerElements.length}</p>
+                <p>Players on field: ${playersOnField}</p>
+                <p>Total available minutes: ${totalPlayerMinutes}</p>
+            `;
+        }
+    </script>
+</body>
+</html>8
