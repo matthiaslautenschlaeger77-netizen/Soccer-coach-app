@@ -48,6 +48,27 @@
         .time-input-group { display: flex; gap: 10px; align-items: center; }
         .time-input-group input { flex: 1; }
         .unit-select { width: 80px; }
+        
+        /* Formation Field Styles */
+        .formation-container { margin-top: 1rem; }
+        .soccer-field { background: #27ae60; border: 2px solid #2c3e50; border-radius: 10px; padding: 20px; position: relative; min-height: 400px; }
+        .field-lines { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid white; border-radius: 8px; }
+        .center-circle { position: absolute; top: 50%; left: 50%; width: 80px; height: 80px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); }
+        .center-spot { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; background: white; border-radius: 50%; transform: translate(-50%, -50%); }
+        .player-circle { position: absolute; width: 40px; height: 40px; background: #3498db; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .player-circle:hover { transform: scale(1.1); background: #2980b9; }
+        .player-circle.bench { background: #e74c3c; }
+        .player-circle.bench:hover { background: #c0392b; }
+        
+        /* Simulation Controls */
+        .simulation-controls { display: flex; gap: 10px; margin-bottom: 1rem; }
+        .pause-btn { background: #f39c12; }
+        .resume-btn { background: #27ae60; }
+        .substitution-panel { background: #34495e; padding: 1rem; border-radius: 8px; margin-top: 1rem; }
+        .substitution-instruction { text-align: center; margin-bottom: 1rem; color: #bdc3c7; }
+        .field-players, .bench-players { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+        .position-group { margin-bottom: 1rem; }
+        .position-title { color: #3498db; font-weight: bold; margin-bottom: 0.5rem; }
     </style>
 </head>
 <body>
@@ -63,7 +84,7 @@
                     <h2>Game Setup</h2>
                     <div class="form-group">
                         <label for="gameType">Game Format:</label>
-                        <select id="gameType" onchange="updateFormations()">
+                        <select id="gameType" onchange="updateFormations(); drawFormation();">
                             <option value="7v7">7v7 (50 minutes)</option>
                             <option value="9v9">9v9 (70 minutes)</option>
                             <option value="11v11" selected>11v11 (90 minutes)</option>
@@ -71,7 +92,16 @@
                     </div>
                     <div class="form-group">
                         <label for="formation">Formation:</label>
-                        <select id="formation"></select>
+                        <select id="formation" onchange="drawFormation()"></select>
+                    </div>
+                    
+                    <div class="formation-container">
+                        <h3>Formation View</h3>
+                        <div class="soccer-field" id="soccerField">
+                            <div class="field-lines"></div>
+                            <div class="center-circle"></div>
+                            <div class="center-spot"></div>
+                        </div>
                     </div>
                 </div>
                 
@@ -132,10 +162,27 @@
         
         <div class="card">
             <h2>Game Simulation & Suggestions</h2>
+            <div class="simulation-controls" id="simulationControls" style="display: none;">
+                <button class="pause-btn" onclick="pauseSimulation()">⏸️ Pause</button>
+                <button class="resume-btn" onclick="resumeSimulation()">▶️ Resume</button>
+                <button onclick="resetSimulation()">🔄 Reset</button>
+            </div>
             <div id="simulationContainer">
                 <p style="text-align: center; color: #7f88d; padding: 1rem;">
                     Start simulation to see substitution patterns and get AI suggestions
                 </p>
+            </div>
+            <div id="substitutionPanel" class="substitution-panel" style="display: none;">
+                <div class="substitution-instruction">⏸️ Simulation Paused - Make substitutions below</div>
+                <div class="position-group">
+                    <div class="position-title">On Field:</div>
+                    <div class="field-players" id="fieldPlayers"></div>
+                </div>
+                <div class="position-group">
+                    <div class="position-title">On Bench:</div>
+                    <div class="bench-players" id="benchPlayers"></div>
+                </div>
+                <button onclick="applySubstitutions()">✅ Apply Substitutions & Continue</button>
             </div>
         </div>
     </div>
@@ -144,6 +191,11 @@
         let players = [];
         let nextId = 1;
         let nextJerseyNumber = 1;
+        let simulationInterval;
+        let currentMinute = 0;
+        let isPaused = false;
+        let fieldPlayers = [];
+        let benchPlayers = [];
         
         const gameConfig = {
             '7v7': { duration: 50, playersOnField: 7 },
@@ -157,8 +209,49 @@
             '11v11': ['4-4-2', '4-3-3', '4-2-3-1', '3-5-2', '4-1-4-1']
         };
         
+        // Formation positions for different formations
+        const formationPositions = {
+            '4-4-2': [
+                {x: 50, y: 85}, // GK
+                {x: 25, y: 70}, {x: 40, y: 70}, {x: 60, y: 70}, {x: 75, y: 70}, // Defense
+                {x: 25, y: 50}, {x: 40, y: 50}, {x: 60, y: 50}, {x: 75, y: 50}, // Midfield
+                {x: 40, y: 30}, {x: 60, y: 30} // Attack
+            ],
+            '4-3-3': [
+                {x: 50, y: 85}, // GK
+                {x: 25, y: 70}, {x: 40, y: 70}, {x: 60, y: 70}, {x: 75, y: 70}, // Defense
+                {x: 35, y: 50}, {x: 50, y: 50}, {x: 65, y: 50}, // Midfield
+                {x: 30, y: 30}, {x: 50, y: 30}, {x: 70, y: 30} // Attack
+            ],
+            '4-2-3-1': [
+                {x: 50, y: 85}, // GK
+                {x: 25, y: 70}, {x: 40, y: 70}, {x: 60, y: 70}, {x: 75, y: 70}, // Defense
+                {x: 40, y: 55}, {x: 60, y: 55}, // CDM
+                {x: 30, y: 40}, {x: 50, y: 40}, {x: 70, y: 40}, // CAM
+                {x: 50, y: 25} // ST
+            ],
+            '3-5-2': [
+                {x: 50, y: 85}, // GK
+                {x: 30, y: 70}, {x: 50, y: 70}, {x: 70, y: 70}, // Defense
+                {x: 15, y: 55}, {x: 35, y: 55}, {x: 50, y: 55}, {x: 65, y: 55}, {x: 85, y: 55}, // Midfield
+                {x: 40, y: 30}, {x: 60, y: 30} // Attack
+            ],
+            '2-3-1': [
+                {x: 50, y: 85}, // GK
+                {x: 35, y: 70}, {x: 65, y: 70}, // Defense
+                {x: 25, y: 55}, {x: 50, y: 55}, {x: 75, y: 55}, // Midfield
+                {x: 50, y: 35} // Attack
+            ],
+            '3-3-2': [
+                {x: 50, y: 85}, // GK
+                {x: 30, y: 70}, {x: 50, y: 70}, {x: 70, y: 70}, // Defense
+                {x: 30, y: 55}, {x: 50, y: 55}, {x: 70, y: 55}, // Midfield
+                {x: 40, y: 35}, {x: 60, y: 35} // Attack
+            ]
+        };
+        
         function initializeSampleTeam() {
-            const sampleNames = ["Alex Johnson", "Ben Smith", "Carlos Rodriguez", "David Lee", "Ethan Wilson", "Frank Miller", "George Brown", "Henry Davis", "Ian Moore", "Jack Taylor", "Kevin Anderson", "Liam Thomas"];
+            const sampleNames = ["Alex Johnson", "Ben Smith", "Carlos Rodriguez", "David Lee", "Ethan Wilson", "Frank Miller", "George Brown", "Henry Davis", "Ian Moore", "Jack Taylor", "Kevin Anderson", "Liam Thomas", "Mike Garcia", "Noah Martinez"];
             
             players = sampleNames.map((name, index) => ({
                 id: index + 1,
@@ -166,13 +259,16 @@
                 jerseyNumber: index + 1,
                 skill: Math.floor(Math.random() * 5) + 6,
                 position: "Field",
-                assignedMinutes: 0
+                assignedMinutes: 0,
+                isOnField: index < 11
             }));
             
             nextId = players.length + 1;
             nextJerseyNumber = players.length + 1;
+            updateFieldAndBench();
             displayPlayers();
             updatePrioritySelect();
+            drawFormation();
         }
         
         function addPlayer() {
@@ -182,10 +278,12 @@
                 jerseyNumber: nextJerseyNumber++,
                 skill: 5,
                 position: "Field",
-                assignedMinutes: 0
+                assignedMinutes: 0,
+                isOnField: false
             };
             
             players.push(newPlayer);
+            updateFieldAndBench();
             displayPlayers();
             updatePrioritySelect();
         }
@@ -196,6 +294,7 @@
         
         function removePlayer(id) {
             players = players.filter(player => player.id !== id);
+            updateFieldAndBench();
             displayPlayers();
             updatePrioritySelect();
         }
@@ -228,7 +327,7 @@
                             <span class="player-number">${player.jerseyNumber}</span>
                             <input type="text" class="player-input" value="${player.name}" onchange="updatePlayerName(${player.id}, this.value)">
                         </div>
-                        <small>Skill: ${player.skill}/10</small>
+                        <small>Skill: ${player.skill}/10 ${player.isOnField ? '🏃‍♂️ On Field' : '🪑 On Bench'}</small>
                     </div>
                     <div class="player-controls">
                         <label>#: <input type="number" class="small-input" value="${player.jerseyNumber}" min="1" max="99" onchange="updatePlayerNumber(${player.id}, this.value)"></label>
@@ -261,6 +360,52 @@
                 option.textContent = formation;
                 formationSelect.appendChild(option);
             });
+        }
+        
+        function drawFormation() {
+            const field = document.getElementById('soccerField');
+            const formation = document.getElementById('formation').value;
+            const gameType = document.getElementById('gameType').value;
+            const positions = formationPositions[formation] || formationPositions['4-4-2'];
+            
+            // Clear existing players
+            const existingPlayers = field.querySelectorAll('.player-circle');
+            existingPlayers.forEach(player => player.remove());
+            
+            // Get players on field
+            const onFieldPlayers = players.filter(p => p.isOnField).slice(0, gameConfig[gameType].playersOnField);
+            
+            // Create player circles
+            onFieldPlayers.forEach((player, index) => {
+                if (index < positions.length) {
+                    const pos = positions[index];
+                    const playerCircle = document.createElement('div');
+                    playerCircle.className = 'player-circle';
+                    playerCircle.style.left = `${pos.x}%`;
+                    playerCircle.style.top = `${pos.y}%`;
+                    playerCircle.textContent = player.jerseyNumber;
+                    playerCircle.title = `${player.name} (#${player.jerseyNumber})`;
+                    playerCircle.onclick = () => substitutePlayer(player.id);
+                    field.appendChild(playerCircle);
+                }
+            });
+        }
+        
+        function updateFieldAndBench() {
+            const gameType = document.getElementById('gameType').value;
+            const maxOnField = gameConfig[gameType].playersOnField;
+            
+            // Ensure we don't have more players on field than allowed
+            let onFieldCount = players.filter(p => p.isOnField).length;
+            if (onFieldCount > maxOnField) {
+                // Move excess players to bench
+                players.filter(p => p.isOnField).slice(maxOnField).forEach(player => {
+                    player.isOnField = false;
+                });
+            }
+            
+            fieldPlayers = players.filter(p => p.isOnField);
+            benchPlayers = players.filter(p => !p.isOnField);
         }
         
         function updateTimeInputs() {
@@ -360,7 +505,7 @@
                 resultsHTML += `
                     <div class="time-item">
                         <div class="time-header">
-                            <strong>#${player.jerseyNumber} ${player.name}</strong>
+                            <strong>#${player.jerseyNumber} ${player.name} ${player.isOnField ? '🏃‍♂️' : '🪑'}</strong>
                             <span>${player.assignedMinutes} min (${percentage}%)</span>
                         </div>
                         <div class="time-bar">
@@ -378,6 +523,10 @@
             const gameType = document.getElementById('gameType').value;
             const config = gameConfig[gameType];
             
+            // Reset simulation state
+            currentMinute = 0;
+            isPaused = false;
+            
             const simulationHTML = `
                 <div class="simulation-container">
                     <div class="game-progress"><div class="progress-fill" id="gameProgress" style="width: 0%"></div></div>
@@ -386,26 +535,31 @@
             `;
             
             document.getElementById('simulationContainer').innerHTML = simulationHTML;
+            document.getElementById('simulationControls').style.display = 'flex';
+            document.getElementById('substitutionPanel').style.display = 'none';
             
             const log = document.getElementById('simulationLog');
             const progress = document.getElementById('gameProgress');
             
-            let currentMinute = 0;
-            const totalMinutes = config.duration;
-            
             log.innerHTML = '<div class="log-entry">🚀 Simulation started at 10x speed...</div>';
             
-            const interval = setInterval(() => {
+            // Clear any existing interval
+            if (simulationInterval) clearInterval(simulationInterval);
+            
+            simulationInterval = setInterval(() => {
+                if (isPaused) return;
+                
                 currentMinute++;
-                const percentage = (currentMinute / totalMinutes) * 100;
+                const percentage = (currentMinute / config.duration) * 100;
                 progress.style.width = percentage + '%';
                 
                 if (currentMinute === 1) {
                     log.innerHTML += `<div class="log-entry">⏰ Minute ${currentMinute}: Game started!</div>`;
                 }
                 
+                // Substitution opportunities
                 if (currentMinute === 25 || currentMinute === 50 || currentMinute === 70) {
-                    log.innerHTML += `<div class="log-entry substitution">🔄 Minute ${currentMinute}: Substitution opportunity</div>`;
+                    log.innerHTML += `<div class="log-entry substitution">🔄 Minute ${currentMinute}: Substitution opportunity - Click Pause to make changes</div>`;
                 }
                 
                 if (currentMinute === 30) {
@@ -425,8 +579,8 @@
                 
                 log.scrollTop = log.scrollHeight;
                 
-                if (currentMinute >= totalMinutes) {
-                    clearInterval(interval);
+                if (currentMinute >= config.duration) {
+                    clearInterval(simulationInterval);
                     log.innerHTML += `<div class="log-entry">🎉 Final whistle! Game completed.</div>`;
                 }
             }, 300);
@@ -436,10 +590,71 @@
             }, 1000);
         }
         
+        function pauseSimulation() {
+            isPaused = true;
+            document.getElementById('substitutionPanel').style.display = 'block';
+            updateSubstitutionPanel();
+        }
+        
+        function resumeSimulation() {
+            isPaused = false;
+            document.getElementById('substitutionPanel').style.display = 'none';
+        }
+        
+        function resetSimulation() {
+            if (simulationInterval) clearInterval(simulationInterval);
+            document.getElementById('simulationControls').style.display = 'none';
+            document.getElementById('substitutionPanel').style.display = 'none';
+            document.getElementById('simulationContainer').innerHTML = '<p style="text-align: center; color: #7f88d; padding: 1rem;">Start simulation to see substitution patterns and get AI suggestions</p>';
+        }
+        
+        function updateSubstitutionPanel() {
+            const fieldContainer = document.getElementById('fieldPlayers');
+            const benchContainer = document.getElementById('benchPlayers');
+            
+            fieldContainer.innerHTML = '';
+            benchContainer.innerHTML = '';
+            
+            fieldPlayers.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-circle';
+                playerDiv.textContent = player.jerseyNumber;
+                playerDiv.title = `${player.name} (#${player.jerseyNumber})`;
+                playerDiv.onclick = () => substitutePlayer(player.id);
+                fieldContainer.appendChild(playerDiv);
+            });
+            
+            benchPlayers.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-circle bench';
+                playerDiv.textContent = player.jerseyNumber;
+                playerDiv.title = `${player.name} (#${player.jerseyNumber})`;
+                playerDiv.onclick = () => substitutePlayer(player.id);
+                benchContainer.appendChild(playerDiv);
+            });
+        }
+        
+        function substitutePlayer(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (player) {
+                player.isOnField = !player.isOnField;
+                updateFieldAndBench();
+                updateSubstitutionPanel();
+                drawFormation();
+                displayPlayers();
+            }
+        }
+        
+        function applySubstitutions() {
+            resumeSimulation();
+            document.getElementById('simulationLog').innerHTML += `<div class="log-entry substitution">🔄 Substitutions applied at minute ${currentMinute}</div>`;
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             initializeSampleTeam();
             updateFormations();
             updateTimeInputs();
+            drawFormation();
         });
     </script>
 </body>
