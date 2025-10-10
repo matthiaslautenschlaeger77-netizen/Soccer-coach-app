@@ -1,485 +1,254 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Official Hanover Soccer Club Time Keeping</title>
-  <style>
-    :root{--accent:#111;--muted:#666;--bg:#fff;--card:#fbfbfb;--success:#2aa96f}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;background:var(--bg);color:#111}
-    header{position:sticky;top:0;background:white;z-index:40;border-bottom:1px solid #eee}
-    .header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px}
-    .title{font-weight:700;letter-spacing:0.02em}
-    .logo{height:48px;width:48px;object-fit:contain}
-    nav{display:flex;gap:8px}
-    .navlink{padding:8px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-weight:600}
-    .navlink.active{background:#111;color:white}
-    main{max-width:1100px;margin:18px auto;padding:12px}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
-    .card{background:var(--card);padding:14px;border-radius:12px;border:1px solid #eee}
-    h2{margin:0 0 8px 0}
-
-    /* field visualization */
-    .field{position:relative;background:linear-gradient(180deg,#0b7 10%, #07a 90%);height:540px;border-radius:12px;padding:12px;color:white}
-    .field .line{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:2px;height:calc(100% - 12px);background:rgba(255,255,255,0.25)}
-    .player{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.95);color:#111;display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;border:3px solid rgba(0,0,0,0.06)}
-    .bench{display:flex;flex-wrap:wrap;gap:8px}
-    .player.small{width:36px;height:36px;font-size:12px}
-
-    /* lists */
-    .player-row{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px}
-    .pill{padding:6px 8px;border-radius:8px;background:#fff;border:1px solid #eee}
-    .controls{display:flex;gap:8px;flex-wrap:wrap}
-
-    /* progress */
-    .progress{height:10px;background:#eee;border-radius:100px;overflow:hidden}
-    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#4aa);width:0%}
-
-    footer{text-align:center;padding:18px;color:var(--muted);font-size:13px}
-
-    /* responsive */
-    @media(max-width:980px){.grid{grid-template-columns:1fr}.field{height:360px}.header-inner{padding:10px}}
-
-    /* small helpers */
-    .muted{color:var(--muted);font-size:13px}
-    .btn{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer;font-weight:700}
-    .btn.ghost{background:white;color:var(--accent);border:1px solid #eee}
-    .input,select{padding:8px;border-radius:8px;border:1px solid #ddd}
-    .danger{background:#ff6b6b}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Official Hanover Soccer Club Time Keeping</title>
+<style>
+  :root {
+    --primary: #004aad;
+    --secondary: #5b8def;
+    --bg: #f4f6fb;
+    --text: #111;
+    --muted: #666;
+    --card: #fff;
+    --radius: 12px;
+  }
+  * {box-sizing:border-box;font-family: 'Inter', 'Segoe UI', sans-serif;}
+  body {margin:0;background:var(--bg);color:var(--text);}
+  header {background:var(--primary);color:#fff;padding:12px 15px;}
+  .header-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;}
+  .header-top h1{margin:0;font-size:1.4rem;}
+  .header-top img{height:55px;border-radius:10px;}
+  nav{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  nav button{background:#fff;color:var(--primary);border:none;
+    border-radius:var(--radius);padding:8px 14px;font-weight:600;cursor:pointer;}
+  nav button.active{background:var(--secondary);color:#fff;}
+  main{padding:16px;}
+  .page{display:none;}
+  .page.active{display:block;}
+  .card{background:var(--card);border-radius:var(--radius);padding:16px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);margin-bottom:16px;}
+  .row{display:flex;flex-wrap:wrap;gap:10px;}
+  .btn{background:var(--primary);color:#fff;border:none;padding:8px 14px;border-radius:var(--radius);cursor:pointer;}
+  .btn.secondary{background:var(--secondary);}
+  input,select,textarea{padding:6px;border:1px solid #ccc;border-radius:6px;width:100%;}
+  table{width:100%;border-collapse:collapse;margin-top:10px;}
+  th,td{padding:6px;border-bottom:1px solid #ddd;text-align:left;}
+  th{background:#f0f2f7;}
+  .muted{color:var(--muted);}
+  .timer-display{font-weight:bold;font-size:1.3rem;}
+  .progress{background:#ccc;border-radius:10px;height:10px;overflow:hidden;}
+  .progress div{background:var(--primary);height:100%;width:0%;transition:width .3s;}
+  @media(max-width:700px){.row{flex-direction:column;}}
+</style>
 </head>
 <body>
   <header>
-    <div class="header-inner">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="text-align:left">
-          <div class="title">Official Hanover Soccer Club Time Keeping</div>
-          <div class="muted">Professional timekeeping • substitutions • formation editor</div>
-        </div>
+    <div class="header-top">
+      <div>
+        <h1>Official Hanover Soccer Club Time Keeping</h1>
+        <p style="margin:0;font-size:.9rem;">Professional timekeeping • roster management • match simulation</p>
       </div>
-      <div style="display:flex;gap:12px;align-items:center">
-        <nav id="nav">
-          <a href="#home" class="navlink active" data-route="home">Home</a>
-          <a href="#timekeeper" class="navlink" data-route="timekeeper">Timekeeper</a>
-          <a href="#players" class="navlink" data-route="players">Players</a>
-          <a href="#simulation" class="navlink" data-route="simulation">Simulation</a>
-          <a href="#settings" class="navlink" data-route="settings">Settings</a>
-        </nav>
-        <img src="/mnt/data/1000022429.jpg" alt="logo" class="logo" onerror="this.style.display='none'"/>
-      </div>
+      <img src="logo.jpg" alt="Hanover logo" onerror="this.style.display='none'">
     </div>
+    <nav>
+      <button class="tab active" data-page="home">Home</button>
+      <button class="tab" data-page="players">Players</button>
+      <button class="tab" data-page="timekeeper">Timekeeper</button>
+      <button class="tab" data-page="simulation">Simulation</button>
+      <button class="tab" data-page="settings">Settings</button>
+    </nav>
   </header>
 
   <main>
-    <section id="page-home">
-      <div class="grid">
-        <div class="card">
-          <h2>Welcome — Quick start</h2>
-          <p class="muted">This system tracks player minutes across 11v11, 9v9, and 7v7. Use the sample team or add your squad from Players. The Timekeeper runs live with a 10x simulation speed option.</p>
-
-          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn" onclick="navigate('timekeeper')">Open Timekeeper</button>
-            <button class="btn ghost" onclick="navigate('players')">Manage Players</button>
-            <button class="btn ghost" onclick="navigate('simulation')">Run Simulation</button>
-          </div>
-
-          <hr style="margin:12px 0"/>
-          <h3 style="margin:8px 0">Sample team loaded</h3>
-          <div class="muted">11 players + bench, with skill levels and a few priority players so you can test substitutions and automatic balancing.</div>
-        </div>
-
-        <div class="card">
-          <h2>Settings snapshot</h2>
-          <div style="margin-top:8px">
-            <div class="muted">Match type</div>
-            <select id="mini-match-type" class="input" onchange="setMatchType(this.value)">
-              <option value="11">11v11 (90m)</option>
-              <option value="9">9v9 (70m)</option>
-              <option value="7">7v7 (50m)</option>
-            </select>
-          </div>
-
-          <div style="margin-top:12px">
-            <div class="muted">Minimum play time filter (minutes)</div>
-            <input id="mini-minutes" class="input" type="number" min="0" max="100" value="0" />
-          </div>
-
-          <div style="margin-top:12px">
-            <div class="muted">Minimum % filter (0-100)</div>
-            <input id="mini-percent" class="input" type="number" min="0" max="100" value="0" />
-          </div>
-
-          <div style="margin-top:12px;display:flex;gap:8px">
-            <button class="btn" onclick="applyFilters()">Apply Filters</button>
-            <button class="btn ghost" onclick="resetSample()">Reset Sample Team</button>
-          </div>
+    <!-- HOME -->
+    <section id="home" class="page active">
+      <div class="card">
+        <h2>Welcome</h2>
+        <p class="muted">Manage your Hanover Soccer Club teams, match timing, and player activity in one place.</p>
+        <div class="row">
+          <button class="btn" onclick="saveTeam()">💾 Save Current Team</button>
+          <button class="btn secondary" onclick="loadTeam()">📂 Load Team</button>
         </div>
       </div>
     </section>
 
-    <section id="page-timekeeper" style="display:none">
-      <div class="grid">
-        <div class="card">
-          <h2>Timekeeper</h2>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <div class="muted">Match type:</div>
-            <select id="match-type" class="input" onchange="changeMatchType(this.value)">
-              <option value="11">11v11 (90)</option>
-              <option value="9">9v9 (70)</option>
-              <option value="7">7v7 (50)</option>
-            </select>
-
-            <div class="muted">Speed:</div>
-            <select id="speed" class="input" onchange="setSpeed(this.value)">
-              <option value="1">Real time</option>
-              <option value="5">5x</option>
-              <option value="10" selected>10x (demo)</option>
-            </select>
-
-            <div style="margin-left:auto;display:flex;gap:8px">
-              <button class="btn" id="startBtn" onclick="toggleTimer()">Start</button>
-              <button class="btn ghost" onclick="resetMatch()">Reset</button>
-            </div>
-          </div>
-
-          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-            <div style="font-weight:800;font-size:28px" id="time-display">00:00 / 90:00</div>
-            <div class="muted">Progress:</div>
-            <div style="flex:1"><div class="progress"><i id="match-progress" style="width:0%"></i></div></div>
-          </div>
-
-          <hr style="margin:12px 0"/>
-
-          <div style="display:flex;gap:12px;align-items:flex-start">
-            <div style="flex:1">
-              <div id="field" class="field" ondragover="event.preventDefault()"></div>
-            </div>
-
-            <div style="width:320px">
-              <div class="card" style="margin-bottom:12px">
-                <h3>On field</h3>
-                <div id="onfield-list"></div>
-              </div>
-              <div class="card">
-                <h3>Bench</h3>
-                <div id="bench-list" class="bench"></div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="card">
-          <h2>Player minutes</h2>
-          <div id="players-table" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
-
-          <hr style="margin:12px 0"/>
-          <h3>AI suggestions</h3>
-          <div id="ai-suggestions" class="muted">Press "Suggest" to get substitution suggestions to better balance minutes.</div>
-          <div style="margin-top:8px;display:flex;gap:8px"><button class="btn" onclick="getAISuggestions()">Suggest</button><button class="btn ghost" onclick="applyAISuggestion()">Apply Top Suggestion</button></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="page-players" style="display:none">
+    <!-- PLAYERS -->
+    <section id="players" class="page">
       <div class="card">
         <h2>Players</h2>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
-          <input placeholder="Name" id="p-name" class="input" />
-          <input placeholder="Number" id="p-number" class="input" type="number" />
-          <select id="p-skill" class="input"><option value="1">1 - low</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5 - high</option></select>
-          <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="p-priority"/> Priority</label>
-          <button class="btn" onclick="addPlayerFromForm()">Add Player</button>
+        <div class="row">
+          <input id="playerName" placeholder="Player Name">
+          <select id="playerPrimary">
+            <option value="GK">GK</option><option value="CB">CB</option><option value="LB">LB</option>
+            <option value="RB">RB</option><option value="CDM">CDM</option><option value="CM">CM</option>
+            <option value="CAM">CAM</option><option value="LW">LW</option><option value="RW">RW</option>
+            <option value="ST">ST</option>
+          </select>
+          <input id="playerSecondary" placeholder="Other positions (comma separated)">
+          <select id="playerClass">
+            <option value="Defensive">Defensive</option>
+            <option value="Midfield">Midfield</option>
+            <option value="Attack">Attack</option>
+          </select>
+          <button class="btn" onclick="addPlayer()">➕ Add</button>
         </div>
-
-        <div id="players-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        <table id="playerTable">
+          <thead>
+            <tr><th>Name</th><th>Primary</th><th>Secondary</th><th>Class</th><th>Plays Less</th><th>Notes</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </section>
 
-    <section id="page-simulation" style="display:none">
+    <!-- TIMEKEEPER -->
+    <section id="timekeeper" class="page">
+      <div class="card">
+        <h2>Timekeeper</h2>
+        <div class="row">
+          <label>Match Type
+            <select id="matchType">
+              <option value="90">11v11 (90 min)</option>
+              <option value="70">9v9 (70 min)</option>
+              <option value="50">7v7 (50 min)</option>
+            </select>
+          </label>
+          <button class="btn" onclick="toggleTimer()">▶ Start</button>
+          <button class="btn secondary" onclick="resetTimer()">⟲ Reset</button>
+          <div class="timer-display" id="timerDisplay">00:00 / 90:00</div>
+        </div>
+        <div class="progress"><div id="progressBar"></div></div>
+      </div>
+    </section>
+
+    <!-- SIMULATION -->
+    <section id="simulation" class="page">
       <div class="card">
         <h2>Simulation</h2>
-        <div class="muted">Run a full match simulation (10x) to see substitutions and time distribution. You can pause and make manual changes.</div>
-        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" onclick="startSimulation()">Start Simulation</button>
-          <button class="btn ghost" onclick="pauseSimulation()">Pause</button>
-          <button class="btn ghost" onclick="resetMatch()">Reset</button>
-        </div>
-        <hr style="margin:12px 0"/>
-        <div id="simulation-log" class="muted" style="max-height:320px;overflow:auto;padding:8px;background:#fff;border-radius:8px;border:1px solid #eee"></div>
+        <p class="muted">Quickly simulate a match result based on player count and classification balance.</p>
+        <button class="btn" onclick="simulate()">⚽ Run Simulation</button>
+        <div id="simResult" style="margin-top:10px;font-weight:bold;"></div>
       </div>
     </section>
 
-    <section id="page-settings" style="display:none">
+    <!-- SETTINGS -->
+    <section id="settings" class="page">
       <div class="card">
         <h2>Settings</h2>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <label class="muted">Auto-balance strength (0-1)</label>
-          <input id="auto-balance" class="input" type="number" min="0" max="1" step="0.1" value="0.7" />
-        </div>
-
-        <div style="margin-top:12px">
-          <button class="btn" onclick="downloadReport()">Download minutes report (CSV)</button>
-        </div>
+        <label>Team Name
+          <input id="teamName" value="Hanover SC">
+        </label>
+        <p class="muted">Logo: Place <b>logo.jpg</b> in the same folder as this file to display it.</p>
       </div>
     </section>
-
   </main>
 
-  <footer>
-    Built for Hanover Soccer Club • Demo prototype • Mobile friendly
-  </footer>
-
-  <script>
-    /* === Simple SPA navigation === */
-    const routes = ['home','timekeeper','players','simulation','settings'];
-    function navigate(route){location.hash = '#'+route;}
-    function setActiveRoute(){
-      const r = location.hash.replace('#','')||'home';
-      routes.forEach(rt=>{document.getElementById('page-'+rt).style.display = (rt===r)?'':'none';
-        document.querySelectorAll('.navlink').forEach(a=>a.classList.toggle('active', a.dataset.route===r));
-      });
-    }
-    window.addEventListener('hashchange', setActiveRoute);
-    setActiveRoute();
-
-    /* === Data model === */
-    const state = {
-      matchType: 11, // 11,9,7
-      durations: {11:90,9:70,7:50},
-      speed:10,
-      running:false,
-      timeSec:0,
-      players:[],
-      onField:[],
-      bench:[],
-      autoBalance:0.7,
-      log:[]
+<script>
+  // Navigation
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById(btn.dataset.page).classList.add('active');
     };
+  });
 
-    // Sample team
-    function resetSample(){
-      state.players = [];
-      const sampleNames = ['A. Smith','B. Jones','C. Brown','D. White','E. Green','F. Black','G. Gray','H. King','I. Lee','J. Young','K. Ford','L. Reed','M. Price','N. Cruz'];
-      for(let i=0;i<13;i++){
-        state.players.push({id:cryptoRandomId(),name:sampleNames[i%sampleNames.length],number:10+i,skill:Math.ceil(Math.random()*5),priority: i<3,minutes:0,position:null});
-      }
-      // put first N on field depending on match type
-      assignInitialField();
-      renderPlayersList();
-      renderField();
-      renderPlayerMinutes();
-    }
-    function cryptoRandomId(){return Math.random().toString(36).slice(2,9)}
+  // Player Management
+  let players = JSON.parse(localStorage.getItem('hanover_players')||'[]');
+  const tbody=document.querySelector('#playerTable tbody');
+  function renderPlayers(){
+    tbody.innerHTML='';
+    players.forEach((p,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${p.name}</td>
+        <td>${p.primary}</td>
+        <td>${p.secondary||''}</td>
+        <td>${p.classification}</td>
+        <td>
+          <select onchange="updateLess(${i},this.value)">
+            <option value="">-</option>
+            <option ${p.less==='Disobedience'?'selected':''}>Disobedience</option>
+            <option ${p.less==='Injury'?'selected':''}>Injury</option>
+            <option ${p.less==='Check Notes'?'selected':''}>Check Notes</option>
+          </select>
+        </td>
+        <td><textarea rows="1" onchange="updateNote(${i},this.value)">${p.notes||''}</textarea></td>
+        <td><button onclick="removePlayer(${i})">✖</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    localStorage.setItem('hanover_players',JSON.stringify(players));
+  }
+  renderPlayers();
 
-    function assignInitialField(){
-      const count = state.matchType;
-      state.onField = state.players.slice(0,count).map(p=>p.id);
-      state.bench = state.players.slice(count).map(p=>p.id);
-      // assign positions simple layout
-      state.players.forEach((p,i)=>p.position = i< count ? i : null);
-    }
+  function addPlayer(){
+    const name=document.getElementById('playerName').value.trim();
+    if(!name)return alert('Enter a name');
+    players.push({
+      name:name,
+      primary:document.getElementById('playerPrimary').value,
+      secondary:document.getElementById('playerSecondary').value,
+      classification:document.getElementById('playerClass').value,
+      less:'',
+      notes:''
+    });
+    document.getElementById('playerName').value='';
+    document.getElementById('playerSecondary').value='';
+    renderPlayers();
+  }
+  function removePlayer(i){players.splice(i,1);renderPlayers();}
+  function updateLess(i,val){players[i].less=val;renderPlayers();}
+  function updateNote(i,val){players[i].notes=val;localStorage.setItem('hanover_players',JSON.stringify(players));}
 
-    /* === Player management === */
-    function addPlayerFromForm(){
-      const name = document.getElementById('p-name').value||'Player';
-      const number = Number(document.getElementById('p-number').value) || (state.players.length+1);
-      const skill = Number(document.getElementById('p-skill').value);
-      const priority = document.getElementById('p-priority').checked;
-      const player = {id:cryptoRandomId(),name,number,skill,priority,minutes:0,position:null};
-      state.players.push(player);
-      assignInitialField();
-      renderPlayersList();renderField();renderPlayerMinutes();
-    }
-    function renderPlayersList(){
-      const list = document.getElementById('players-list'); if(!list) return;
-      list.innerHTML='';
-      state.players.forEach(p=>{
-        const div = document.createElement('div'); div.className='player-row card';
-        div.innerHTML = `<div style='display:flex;gap:12px;align-items:center'><div style='width:44px;height:44px;border-radius:50%;background:#111;color:white;display:flex;align-items:center;justify-content:center;font-weight:700'>${p.number}</div><div><strong>${p.name}</strong><div class='muted'>Skill ${p.skill} ${p.priority? '• Priority':''}</div></div></div><div style='display:flex;gap:8px;align-items:center'><button class='btn ghost' onclick='togglePriority("${p.id}")'>Toggle Priority</button><button class='btn danger' onclick='removePlayer("${p.id}")'>Remove</button></div>`;
-        list.appendChild(div);
-      })
-    }
-    function togglePriority(id){const p=state.players.find(x=>x.id===id); if(!p) return; p.priority=!p.priority; renderPlayersList();}
-    function removePlayer(id){state.players = state.players.filter(x=>x.id!==id); assignInitialField(); renderPlayersList(); renderField(); renderPlayerMinutes();}
+  // Save / Load Teams
+  function saveTeam(){
+    const name=document.getElementById('teamName').value;
+    localStorage.setItem('team_'+name,JSON.stringify(players));
+    alert('Team "'+name+'" saved!');
+  }
+  function loadTeam(){
+    const name=document.getElementById('teamName').value;
+    const data=localStorage.getItem('team_'+name);
+    if(!data)return alert('No saved team found');
+    players=JSON.parse(data);
+    renderPlayers();
+    alert('Team "'+name+'" loaded!');
+  }
 
-    /* === Field rendering === */
-    function renderField(){
-      const field = document.getElementById('field'); field.innerHTML='';
-      // draw simple formation positions based on matchType
-      const coords = formationCoords(state.matchType);
-      state.onField.forEach((pid,idx)=>{
-        const p = state.players.find(x=>x.id===pid); if(!p) return;
-        const el = document.createElement('div'); el.className='player'; el.draggable=true; el.dataset.id=pid; el.innerHTML=`<div style='text-align:center'>${p.number}</div>`;
-        el.style.left = coords[idx]?.x+'%'; el.style.top = coords[idx]?.y+'%';
-        el.onclick = ()=>onFieldClick(pid);
-        el.ondragstart = e=>{e.dataTransfer.setData('text/plain',pid)};
-        field.appendChild(el);
-      });
-      // bench
-      const bench = document.getElementById('bench-list'); bench.innerHTML='';
-      state.bench.forEach(pid=>{
-        const p=state.players.find(x=>x.id===pid); const el=document.createElement('div'); el.className='player small'; el.dataset.id=pid; el.innerText=p.number; el.onclick=()=>onBenchClick(pid); el.draggable=true; el.ondragstart=e=>{e.dataTransfer.setData('text/plain',pid)}; bench.appendChild(el);
-      });
+  // Timekeeper
+  let timer=null,time=0,total=90;
+  function toggleTimer(){
+    if(timer){clearInterval(timer);timer=null;return;}
+    total=parseInt(document.getElementById('matchType').value);
+    timer=setInterval(()=>{
+      time++;
+      const m=Math.floor(time/60), s=time%60;
+      const mm=String(m).padStart(2,'0'), ss=String(s).padStart(2,'0');
+      document.getElementById('timerDisplay').textContent=`${mm}:${ss} / ${total}:00`;
+      document.getElementById('progressBar').style.width=(time/(total*60)*100)+'%';
+      if(time>=total*60){clearInterval(timer);timer=null;}
+    },1000);
+  }
+  function resetTimer(){
+    clearInterval(timer);timer=null;time=0;
+    const total=parseInt(document.getElementById('matchType').value);
+    document.getElementById('timerDisplay').textContent=`00:00 / ${total}:00`;
+    document.getElementById('progressBar').style.width='0%';
+  }
 
-      // field drop to bench
-      field.ondrop = e=>{
-        const id = e.dataTransfer.getData('text/plain'); // if bench to field
-        if(!id) return; if(state.bench.includes(id)){
-          // swap with closest? here just put to first free spot
-          if(state.onField.length < state.matchType){
-            state.bench = state.bench.filter(x=>x!==id); state.onField.push(id);
-          } else {
-            // swap with clicked location if any
-          }
-          renderField(); renderPlayerMinutes();
-        }
-      };
-    }
-
-    function onFieldClick(pid){ // move to bench
-      if(confirm('Substitute this player to bench?')){
-        state.onField = state.onField.filter(x=>x!==pid); state.bench.unshift(pid); renderField(); renderPlayerMinutes(); logEvent('sub out', pid);
-      }
-    }
-    function onBenchClick(pid){ // bring to field
-      if(state.onField.length >= state.matchType){
-        if(!confirm('Field is full. Replace the last on-field player?')) return; const out = state.onField.pop(); state.bench = state.bench.filter(x=>x!==pid); state.bench.unshift(out); state.onField.push(pid);
-      } else { state.bench = state.bench.filter(x=>x!==pid); state.onField.push(pid);} renderField(); renderPlayerMinutes(); logEvent('sub in', pid);
-    }
-
-    function formationCoords(type){
-      // Returns array of {x,y} for players index 0..count-1. Simple presets for 11/9/7
-      if(type==11){
-        return [ {x:50,y:8},{x:20,y:22},{x:80,y:22},{x:12,y:40},{x:88,y:40},{x:30,y:60},{x:70,y:60},{x:20,y:80},{x:50,y:72},{x:80,y:80},{x:50,y:50} ];
-      }
-      if(type==9){
-        return [ {x:50,y:8},{x:25,y:28},{x:75,y:28},{x:20,y:48},{x:80,y:48},{x:40,y:68},{x:60,y:68},{x:30,y:88},{x:70,y:88} ];
-      }
-      return [ {x:50,y:12},{x:30,y:42},{x:70,y:42},{x:25,y:70},{x:75,y:70},{x:40,y:88},{x:60,y:88} ];
-    }
-
-    /* === Timekeeping === */
-    let tickInterval = null;
-    function toggleTimer(){ state.running = !state.running; document.getElementById('startBtn').innerText = state.running ? 'Pause' : 'Start'; if(state.running) startTick(); else stopTick(); }
-    function setSpeed(s){ state.speed = Number(s); }
-    function changeMatchType(v){ state.matchType = Number(v); assignInitialField(); renderField(); renderPlayerMinutes(); updateTimeDisplay(); }
-    function setMatchType(v){ document.getElementById('match-type').value = v; changeMatchType(v); }
-
-    function startTick(){ if(tickInterval) clearInterval(tickInterval); const ms = 1000 / state.speed; tickInterval = setInterval(()=>{ advanceTime(1); }, ms); }
-    function stopTick(){ if(tickInterval) clearInterval(tickInterval); tickInterval=null; }
-    function resetMatch(){ stopTick(); state.timeSec=0; state.running=false; state.players.forEach(p=>p.minutes=0); document.getElementById('startBtn').innerText='Start'; renderPlayerMinutes(); updateTimeDisplay(); state.log=[]; document.getElementById('simulation-log').innerHTML=''; }
-
-    function advanceTime(seconds){
-      const dur = state.durations[state.matchType]*60; state.timeSec += seconds; if(state.timeSec>dur) {state.timeSec = dur; stopTick(); state.running=false; document.getElementById('startBtn').innerText='Start';}
-      // add seconds to players on field
-      state.onField.forEach(id=>{ const p = state.players.find(x=>x.id===id); if(p) p.minutes += seconds/60; });
-      renderPlayerMinutes(); updateTimeDisplay(); maybeAutoSub(); }
-
-    function updateTimeDisplay(){ const dur = state.durations[state.matchType]*60; const mm = Math.floor(state.timeSec/60).toString().padStart(2,'0'); const ss = Math.floor(state.timeSec%60).toString().padStart(2,'0'); document.getElementById('time-display').innerText = `${mm}:${ss} / ${state.durations[state.matchType]}:00`; const pct = (state.timeSec/dur)*100; document.getElementById('match-progress').style.width = pct+'%'; }
-
-    /* === Minutes view === */
-    function renderPlayerMinutes(){
-      const el = document.getElementById('players-table'); el.innerHTML='';
-      state.players.forEach(p=>{
-        const row = document.createElement('div'); row.className='player-row';
-        const pct = Math.round((p.minutes / state.durations[state.matchType]) * 100) || 0;
-        row.innerHTML = `<div style='display:flex;gap:12px;align-items:center'><div class='pill'>#${p.number}</div><div style='min-width:140px'><strong>${p.name}</strong><div class='muted'>Skill ${p.skill} ${p.priority? '• Priority':''}</div></div></div><div style='width:48%'><div style='display:flex;align-items:center;gap:8px'><div style='flex:1'><div class='progress'><i style='width:${Math.min(100,pct)}%'></i></div></div><div style='width:52px;text-align:right;font-weight:700'>${p.minutes.toFixed(1)}m</div></div></div>`;
-        el.appendChild(row);
-      })
-    }
-
-    /* === AI suggestions & balancing algorithm === */
-    // Goal: balance minutes so that differences reduce, but respect priority and skill
-    function getAISuggestions(){
-      // compute desired minutes baseline
-      const dur = state.durations[state.matchType];
-      const totalPlayers = state.players.length;
-      const active = state.onField.length;
-      // target equal distribution for minutes among all players, but priority players get +10%
-      const baseTarget = dur * (active/totalPlayers); // rough baseline
-      const suggestions = [];
-      // compute current minutes
-      state.players.forEach(p=>{
-        const priorityBoost = p.priority ? 1.1 : 1.0;
-        const target = baseTarget * priorityBoost;
-        suggestions.push({id:p.id,name:p.name,current:p.minutes,target});
-      });
-      // sort by (current - target) descending to find who has overplayed
-      suggestions.sort((a,b)=> (b.current - b.target) - (a.current - a.target));
-      const out = suggestions.slice(0,6).map(s=>`${s.name}: current ${s.current.toFixed(1)}m target ${(s.target).toFixed(1)}m`);
-      document.getElementById('ai-suggestions').innerText = out.join('\n');
-      return suggestions;
-    }
-
-    function applyAISuggestion(){
-      // simple: substitute top overplayed with most underplayed
-      const sug = getAISuggestions();
-      const over = sug.find(s=>s.current > s.target);
-      const under = [...sug].reverse().find(s=>s.current < s.target);
-      if(!over || !under){ alert('No clear suggestions'); return; }
-      // if over is on field and under is bench, swap
-      const overOn = state.onField.includes(over.id);
-      const underOn = state.onField.includes(under.id);
-      if(overOn && !underOn){ // swap
-        state.onField = state.onField.map(x=> x===over.id ? under.id : x);
-        state.bench = state.bench.map(x=> x===under.id ? over.id : x);
-      } else if(!overOn && underOn){ // reversed
-        state.onField = state.onField.map(x=> x===under.id ? over.id : x);
-        state.bench = state.bench.map(x=> x===over.id ? under.id : x);
-      }
-      renderField(); renderPlayerMinutes(); logEvent('ai-swap', `${over.name} ↔ ${under.name}`);
-    }
-
-    /* === Auto substitution opportunities === */
-    function maybeAutoSub(){
-      // run only when running
-      if(!state.running) return;
-      // every 5 simulated minutes check
-      if(Math.floor(state.timeSec/60) % 5 !==0) return;
-      // if any player has exceeded target + threshold, swap
-      const suggestions = getAISuggestions();
-      const over = suggestions.find(s=> s.current > s.target + 5);
-      const under = [...suggestions].reverse().find(s=> s.current < s.target - 1);
-      if(over && under){
-        // if over on field and under on bench, swap
-        if(state.onField.includes(over.id) && state.bench.includes(under.id)){
-          state.onField = state.onField.map(x=> x===over.id ? under.id : x);
-          state.bench = state.bench.map(x=> x===under.id ? over.id : x);
-          renderField(); renderPlayerMinutes(); logEvent('auto-sub', `${over.name} ↔ ${under.name}`);
-        }
-      }
-    }
-
-    /* === Simulation controls === */
-    function startSimulation(){ setSpeed(10); document.getElementById('speed').value = 10; if(!state.running){ toggleTimer(); } state.log=[]; document.getElementById('simulation-log').innerHTML=''; }
-    function pauseSimulation(){ if(state.running) toggleTimer(); }
-    function logEvent(type, text){ state.log.push({time:state.timeSec,type,text}); const el=document.getElementById('simulation-log'); const line = document.createElement('div'); line.innerText = `${formatTime(state.timeSec)} • ${type} • ${text}`; el.prepend(line); }
-    function formatTime(sec){ const m=Math.floor(sec/60); const s=Math.floor(sec%60); return `${m}:${s.toString().padStart(2,'0')}` }
-
-    /* === Drag & drop manual swap support handled by click events above === */
-
-    /* === Filters === */
-    function applyFilters(){ const mn = Number(document.getElementById('mini-minutes').value); const pct = Number(document.getElementById('mini-percent').value); // filter would hide players not meeting criteria in UI
-      // For demo just show an alert
-      alert(`Filter applied: min ${mn} minutes or ${pct}%`);
-    }
-
-    /* === Download report === */
-    function downloadReport(){ const rows = [['Number','Name','Minutes']]; state.players.forEach(p=> rows.push([p.number,p.name,p.minutes.toFixed(2)])); const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n'); const blob = new Blob([csv],{type:'text/csv'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='minutes_report.csv'; a.click(); URL.revokeObjectURL(url); }
-
-    /* === Small utilities to keep UI in sync === */
-    document.getElementById('auto-balance').addEventListener('change', e=>state.autoBalance = Number(e.target.value));
-    document.getElementById('speed').addEventListener('change', e=>setSpeed(e.target.value));
-
-    /* === initialization === */
-    resetSample();
-    updateTimeDisplay();
-
-    // expose some functions for inline handlers
-    window.navigate = navigate; window.resetSample = resetSample; window.applyFilters = applyFilters; window.addPlayerFromForm = addPlayerFromForm; window.toggleTimer = toggleTimer; window.changeMatchType = changeMatchType; window.setSpeed = setSpeed; window.renderField = renderField; window.renderPlayerMinutes = renderPlayerMinutes; window.getAISuggestions = getAISuggestions; window.applyAISuggestion = applyAISuggestion; window.startSimulation = startSimulation; window.pauseSimulation = pauseSimulation; window.resetMatch = resetMatch; window.setMatchType = setMatchType; window.downloadReport = downloadReport; window.togglePriority = togglePriority; window.removePlayer = removePlayer;
-
-  </script>
+  // Simulation
+  function simulate(){
+    const d=players.filter(p=>p.classification==='Defensive').length;
+    const m=players.filter(p=>p.classification==='Midfield').length;
+    const a=players.filter(p=>p.classification==='Attack').length;
+    const scoreH=Math.floor((a+m)/2 + Math.random()*3);
+    const scoreA=Math.floor(d/3 + Math.random()*2);
+    document.getElementById('simResult').textContent=`Result: Hanover ${scoreH} - ${scoreA} Opponent`;
+  }
+</script>
 </body>
 </html>
