@@ -1,875 +1,122 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Official Hanover Soccer Club Time Keeping</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horology by ML</title>
 <style>
-  :root{
-    --bg:#f4f7fb; --card:#fff; --accent:#0b57b8; --accent-2:#0b8fb8; --muted:#6b7380;
-    --radius:12px; --field-green:#0aa; --text:#0b1b2b;
-  }
-  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
-  body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
-  header{background:var(--accent);color:white;padding:12px 16px;position:sticky;top:0;z-index:50}
-  .header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .title{font-weight:800;font-size:18px}
-  .subtitle{font-size:13px;color:rgba(255,255,255,0.9)}
-  .logo{height:56px;width:56px;border-radius:8px}
-  nav{max-width:1100px;margin:8px auto;display:flex;gap:8px;padding:0 8px;justify-content:center}
-  .tab{background:white;color:var(--accent);border-radius:999px;padding:8px 12px;border:0;font-weight:700;cursor:pointer}
-  .tab.active{background:var(--accent-2);color:white}
-
-  main{max-width:1100px;margin:18px auto;padding:12px}
-  .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
-  .card{background:var(--card);border-radius:12px;padding:14px;border:1px solid #e7e9ef;box-shadow:0 6px 18px rgba(9,30,66,0.04)}
-  h2{margin:0 0 8px 0}
-  .muted{color:var(--muted);font-size:13px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .input,select,textarea{padding:8px;border-radius:8px;border:1px solid #dfe6ee}
-  .btn{padding:8px 12px;border-radius:10px;border:0;background:var(--accent);color:white;font-weight:800;cursor:pointer}
-  .btn.ghost{background:white;border:1px solid #eee;color:var(--accent)}
-  .btn.small{padding:6px 8px;font-size:13px}
-  .field{background:linear-gradient(180deg,#18b26a 0%, #0aa 100%);height:520px;border-radius:12px;padding:12px;color:white;position:relative;overflow:hidden}
-  .midline{position:absolute;left:50%;top:8px;bottom:8px;transform:translateX(-50%);width:2px;background:rgba(255,255,255,0.18)}
-  .player{position:absolute;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:white;color:#111;display:flex;align-items:center;justify-content:center;font-weight:800;cursor:pointer;border:3px solid rgba(0,0,0,0.06);box-shadow:0 6px 18px rgba(0,0,0,0.12)}
-  .player.small{width:38px;height:38px;font-size:12px}
-  .bench{display:flex;flex-wrap:wrap;gap:8px;padding-top:8px}
-  .player-row{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:#fff;border:1px solid #f2f4f8}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{padding:8px;border-bottom:1px solid #f2f4f8;font-size:14px}
-  .progress{height:10px;background:#eee;border-radius:999px;overflow:hidden}
-  .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#4aa);width:0%}
-  footer{text-align:center;padding:14px;color:var(--muted)}
-  @media(max-width:980px){.grid{grid-template-columns:1fr}.field{height:360px}}
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f4f4; color:#333; }
+  header { background:#111; color:#fff; padding:20px 0; text-align:center; }
+  nav a { color:#fff; margin:0 15px; text-decoration:none; font-weight:bold; }
+  .container { max-width:1200px; margin:20px auto; padding:0 20px; }
+  h1,h2,h3 { margin-top:0; }
+  .post { background:#fff; padding:20px; margin-bottom:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+  .product { display:flex; gap:20px; background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-bottom:20px; flex-wrap:wrap;}
+  .product img { max-width:300px; border-radius:10px;}
+  .product-details { flex:1; min-width:250px;}
+  button { background:#111; color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; margin-top:10px;}
+  button:hover { background:#333; }
+  .reviews { margin-top:20px;}
+  .review { background:#eee; padding:10px; margin-bottom:10px; border-radius:5px; }
+  .contact-form input, .contact-form textarea { width:100%; padding:10px; margin-bottom:10px; border-radius:5px; border:1px solid #ccc; }
+  footer { background:#111; color:#fff; text-align:center; padding:20px 0; margin-top:40px;}
+  .search-box { margin-bottom:20px; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-inner">
-    <div>
-      <div class="title">Official Hanover Soccer Club Time Keeping</div>
-      <div class="subtitle">Professional timekeeping • substitutions • formation editor</div>
-    </div>
-    <img class="logo" src="data:image/jpeg;base64,/*BASE64_LOGO_REPLACE*/" alt="Hanover logo" onerror="this.style.display='none'"/>
-  </div>
+  <h1>Horology by ML</h1>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#products">Shop</a>
+    <a href="#contact">Support</a>
+  </nav>
 </header>
 
-<nav style="display:flex;justify-content:center;gap:8px;margin-top:8px">
-  <button class="tab active" data-page="home">Home</button>
-  <button class="tab" data-page="players">Players</button>
-  <button class="tab" data-page="timekeeper">Timekeeper</button>
-  <button class="tab" data-page="simulation">Simulation</button>
-  <button class="tab" data-page="settings">Settings</button>
-</nav>
+<div class="container" id="home">
+  <div class="post">
+    <h2>Welcome to Horology by ML</h2>
+    <p>Hi there, and welcome to <strong>Horology by ML</strong>!</p>
+    <p>This is the place where you’ll find everything to do with our watches—our designs, updates, and behind-the-scenes glimpses of the handcrafting process. We’ll also be sharing news, new releases, and updates here on the website as well as on our social media <strong>@horologybyml</strong>.</p>
+    <p>Thanks for stopping by, and we can’t wait to share our journey with you!</p>
+  </div>
+</div>
 
-<main>
-  <section id="home" class="card" style="margin-bottom:16px">
-    <h2>Welcome</h2>
-    <p class="muted">This app tracks minutes for 11v11 (90), 9v9 (70) and 7v7 (50). The team from your screenshot is preloaded. Use Players to edit names, numbers, positions, and notes. Timekeeper runs live with simulation and substitution tools.</p>
-    <div style="margin-top:12px" class="row">
-      <button class="btn" onclick="go('timekeeper')">Open Timekeeper</button>
-      <button class="btn ghost" onclick="go('players')">Edit Players</button>
-      <button class="btn ghost" onclick="go('simulation')">Open Simulation</button>
-      <button class="btn ghost" onclick="exportCSV()">Export minutes CSV</button>
+<div class="container" id="products">
+  <h2>Shop</h2>
+  
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search products..." onkeyup="searchProducts()">
+  </div>
+
+  <div class="product" data-name="Custom Automatic Watch">
+    <img src="custom_automatic_watch_design.jpg" alt="Custom Automatic Watch">
+    <div class="product-details">
+      <h3>Custom Automatic Watch</h3>
+      <p>Price: <strong>495 CAD</strong></p>
+      <p>A handcrafted automatic watch designed for precision and style.</p>
+      <button onclick="alert('Purchase functionality coming soon!')">Buy Now</button>
+
+      <div class="reviews">
+        <h4>Reviews</h4>
+        <div id="reviewList"></div>
+        <input type="text" id="reviewInput" placeholder="Write a review">
+        <button onclick="addReview()">Submit Review</button>
+      </div>
     </div>
-  </section>
+  </div>
+</div>
 
-  <div class="grid">
-    <div>
-      <!-- Players page -->
-      <section id="page-players" class="card">
-        <h2>Players</h2>
-        <div class="muted">Edit players, set numbers, primary/secondary positions, classification, notes and reason for reduced minutes.</div>
-        <div style="margin-top:12px" class="row">
-          <input id="p-name" class="input" placeholder="Player name" style="flex:2" />
-          <input id="p-number" class="input" placeholder="Number" style="width:84px"/>
-          <select id="p-primary" class="input" style="width:140px">
-            <option>GK</option><option>CB</option><option>LB</option><option>RB</option>
-            <option>CDM</option><option>CM</option><option>CAM</option><option>LW</option><option>RW</option><option>ST</option>
-          </select>
-          <input id="p-secondary" class="input" placeholder="Other positions (comma separated)" style="flex:1"/>
-          <select id="p-class" class="input" style="width:130px">
-            <option>Defensive</option><option>Midfield</option><option>Attack</option>
-          </select>
-          <button class="btn" onclick="addPlayer()">Add</button>
-        </div>
-
-        <div style="margin-top:12px;overflow:auto">
-          <table id="players-table">
-            <thead><tr><th style="width:220px">Name</th><th>Num</th><th>Primary</th><th>Secondary</th><th>Class</th><th>Plays Less</th><th>Notes</th><th></th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-
-        <div style="margin-top:12px" class="row">
-          <input id="team-save-name" class="input" placeholder="Team name (save/load)" style="flex:1"/>
-          <button class="btn" onclick="saveTeam()">Save Team</button>
-          <button class="btn ghost" onclick="loadTeam()">Load Team</button>
-          <button class="btn ghost" onclick="resetToSample()">Reset Sample</button>
-        </div>
-      </section>
-
-      <!-- Timekeeper -->
-      <section id="page-timekeeper" class="card" style="margin-top:12px">
-        <h2>Timekeeper</h2>
-        <div class="muted">Start the clock, watch minutes update in real-time. Make substitutions manually or use AI suggestions.</div>
-
-        <div style="margin-top:12px" class="row">
-          <label>Match type
-            <select id="match-type" class="input" onchange="changeMatchType(this.value)">
-              <option value="11">11v11 (90)</option>
-              <option value="9" selected>9v9 (70)</option>
-              <option value="7">7v7 (50)</option>
-            </select>
-          </label>
-
-          <label>Formation
-            <select id="formation-select" class="input" onchange="applyFormation(this.value)">
-              <!-- will populate -->
-            </select>
-          </label>
-
-          <label>Speed
-            <select id="sim-speed" class="input" onchange="setSpeed(this.value)">
-              <option value="1">1x</option><option value="5">5x</option><option value="10" selected>10x</option>
-            </select>
-          </label>
-
-          <div style="margin-left:auto" class="row">
-            <button id="startBtn" class="btn" onclick="toggleTimer()">Start</button>
-            <button class="btn ghost" onclick="resetMatch()">Reset</button>
-          </div>
-        </div>
-
-        <div style="margin-top:12px" class="row vcenter">
-          <div style="font-weight:800;font-size:22px" id="time-display">00:00 / 70:00</div>
-          <div class="muted">Progress:</div>
-          <div style="flex:1"><div class="progress"><i id="match-progress" style="width:0%"></i></div></div>
-        </div>
-
-        <hr style="margin:12px 0"/>
-
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          <div style="flex:1">
-            <div id="field" class="field" ondrop="onFieldDrop(event)" ondragover="event.preventDefault()">
-              <div class="midline"></div>
-            </div>
-          </div>
-
-          <div style="width:320px">
-            <div class="card" style="margin-bottom:12px">
-              <h3>On field</h3>
-              <div id="onfield-list"></div>
-            </div>
-
-            <div class="card" style="margin-bottom:12px">
-              <h3>Bench</h3>
-              <div id="bench-list" class="bench"></div>
-            </div>
-
-            <div class="card">
-              <h3>Players minutes</h3>
-              <div id="players-minutes"></div>
-              <div style="margin-top:8px" class="row">
-                <button class="btn" onclick="getAISuggestions()">AI Suggest</button>
-                <button class="btn ghost" onclick="applyAISuggestion()">Apply top</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Simulation -->
-      <section id="page-simulation" class="card" style="margin-top:12px">
-        <h2>Simulation</h2>
-        <p class="muted">Run a match simulation and watch substitutions and time distribution (10x speed by default).</p>
-        <div class="row">
-          <button class="btn" onclick="startSimulation()">Start Simulation</button>
-          <button class="btn ghost" onclick="pauseSimulation()">Pause</button>
-          <button class="btn ghost" onclick="resetMatch()">Reset</button>
-        </div>
-        <div style="margin-top:12px" id="simulation-log" class="muted" style="max-height:240px;overflow:auto"></div>
-      </section>
-
-    </div>
-
-    <!-- Right column -->
-    <aside>
-      <section class="card">
-        <h3>Settings snapshot</h3>
-        <div class="muted">Filters and quick actions</div>
-        <div style="margin-top:12px" class="row">
-          <div style="flex:1">
-            <label>Min minutes (0 - full)</label>
-            <input id="min-minutes" class="input" type="number" min="0" max="100" value="0"/>
-          </div>
-          <div style="flex:1">
-            <label>Min % (0-100)</label>
-            <input id="min-percent" class="input" type="number" min="0" max="100" value="0"/>
-          </div>
-        </div>
-
-        <div style="margin-top:12px" class="row">
-          <button class="btn" onclick="applyFilters()">Apply Filters</button>
-          <button class="btn ghost" onclick="exportCSV()">Export CSV</button>
-        </div>
-      </section>
-
-      <section class="card" style="margin-top:12px">
-        <h3>Quick actions</h3>
-        <div class="row">
-          <button class="btn" onclick="saveTeamPrompt()">Save Team</button>
-          <button class="btn ghost" onclick="loadTeamPrompt()">Load Team</button>
-        </div>
-        <div style="margin-top:10px" class="muted">Teams are stored locally in your browser.</div>
-      </section>
-
-    </aside>
-
-  </div> <!-- grid -->
-
-</main>
+<div class="container" id="contact">
+  <h2>Support</h2>
+  <form class="contact-form" onsubmit="submitForm(event)">
+    <input type="text" id="name" placeholder="Your Name" required>
+    <input type="email" id="email" placeholder="Your Email" required>
+    <textarea id="message" placeholder="Your Message" rows="5" required></textarea>
+    <button type="submit">Send Message</button>
+  </form>
+</div>
 
 <footer>
-  Built for Hanover Soccer Club — demo prototype — mobile friendly
+  <p>&copy; 2025 Horology by ML | Follow us on <strong>@horologybyml</strong></p>
 </footer>
 
 <script>
-/* -------------------------
-  Preloaded player list from user's screenshot
-   Fields: id, name, number, primary, secondary, classification, minutes, priority, less, notes
--------------------------*/
-let state = {
-  matchType: 9, // 11,9,7
-  durations: {11:90,9:70,7:50},
-  speed: 10, // 10x default
-  running: false,
-  timeSec: 0,
-  players: [],
-  onField: [],
-  bench: [],
-  formation: '3-4-1', // default for 9v9
-  log: [],
-  autoBalance: 0.7
-};
-
-// Use sample players (names transcribed from screenshot)
-const SAMPLE_PLAYERS = [
-  {name:'Timofei Komarov', number:1, primary:'GK', secondary:'', classification:'Defensive'},
-  {name:'Logan Barkman', number:2, primary:'CB', secondary:'LB, RB', classification:'Defensive'},
-  {name:'Brayden Bernier', number:3, primary:'LB', secondary:'RB, CB', classification:'Defensive'},
-  {name:'Sawyer Matthews', number:4, primary:'RB', secondary:'LB, CB', classification:'Defensive'},
-  {name:'Jeremy Knox', number:5, primary:'RB', secondary:'LB, CB', classification:'Defensive'},
-  {name:'Payton Wiebe', number:6, primary:'ST', secondary:'Versatile', classification:'Attack'},
-  {name:'Everett Gadsby', number:7, primary:'LW', secondary:'RW, CM, LB, RB', classification:'Midfield'},
-  {name:'David Maier', number:8, primary:'ST', secondary:'LW, RW, CAM, CM', classification:'Attack'},
-  {name:'Justin Cadotte', number:9, primary:'LW', secondary:'CAM, CM, RW', classification:'Midfield'},
-  {name:'Sullivan Matthews', number:10, primary:'CAM', secondary:'RW, LW, CM, ST', classification:'Attack'},
-  {name:'Erik Grandbois', number:11, primary:'CDM', secondary:'CAM, ST, LW, RW, CM', classification:'Midfield'},
-  {name:'Raja Padilla', number:12, primary:'CDM', secondary:'CM, LW, RW, ST, CAM, CB', classification:'Midfield'},
-  {name:'Chase Geisheimer', number:13, primary:'LW', secondary:'RW, ST, CAM, CM', classification:'Attack'},
-  {name:'Joshua Pankratz', number:14, primary:'LW', secondary:'RW, ST, CAM', classification:'Attack'},
-  {name:'Benjamin Boese', number:15, primary:'LW', secondary:'RW, CM, CDM', classification:'Midfield'},
-  {name:'Walker Neufeld', number:16, primary:'CM', secondary:'Versatile', classification:'Midfield'}
-];
-
-// Utility to create ids
-function uid(){return Math.random().toString(36).slice(2,9)}
-
-// Initialize players into state with ids and minutes
-function loadSample(){
-  state.players = SAMPLE_PLAYERS.map(p=>({
-    id: uid(), name:p.name, number:p.number||'', primary:p.primary, secondary:p.secondary||'', classification:p.classification, minutes:0, priority:false, less:'', notes:''
-  }));
-  // initial field assignment for 9v9 formation 3-4-1
-  assignInitialField();
-  renderPlayersTable();
-  renderField();
-  renderMinutes();
-  updateTimeDisplay();
-}
-
-// Assign initial field based on matchType and formation
-function assignInitialField(){
-  const count = state.matchType;
-  // For default formation list (we'll position visually later)
-  // Put first N players onfield, rest bench
-  state.onField = state.players.slice(0, count).map(p=>p.id);
-  state.bench = state.players.slice(count).map(p=>p.id);
-  // store position index
-  state.players.forEach((p,i)=> p.position = state.onField.includes(p.id) ? state.onField.indexOf(p.id) : null);
-}
-
-/* ---------- FORMATIONS ---------- */
-// We'll define presets keyed by "matchType:formation" where formation lists position labels
-const FORMATIONS = {
-  '9:3-4-1': ['CB','CB','CB','CM','CM','CM','CM','LW','RW','ST'].slice(0,9), // adapt
-  // more 9v9 options
-  '9:3-3-2': ['CB','CB','CB','CM','CM','CM','LW','RW','ST'].slice(0,9),
-  // 11v11 presets
-  '11:4-3-3': ['CB','CB','CB','CB','CM','CM','CM','LW','RW','ST','GK'],
-  '11:4-4-2': ['CB','CB','CB','CB','CM','CM','LW','RW','ST','ST','GK'],
-  // 7v7 presets
-  '7:2-3-1': ['CB','CB','CM','CM','CM','LW','ST'].slice(0,7)
-};
-
-// dropdown options (we'll pick those relevant)
-const FORMATION_OPTIONS = [
-  {match:9, code:'3-4-1', label:'3-4-1 (default)'},
-  {match:9, code:'3-3-2', label:'3-3-2'},
-  {match:11, code:'4-3-3', label:'4-3-3'},
-  {match:11, code:'4-4-2', label:'4-4-2'},
-  {match:7, code:'2-3-1', label:'2-3-1'}
-];
-
-function populateFormationSelect(){
-  const sel = document.getElementById('formation-select');
-  sel.innerHTML='';
-  FORMATION_OPTIONS.forEach(opt=>{
-    const o=document.createElement('option');
-    o.value = `${opt.match}:${opt.code}`;
-    o.textContent = `${opt.label} (${opt.match}v${opt.match===11?11:opt.match})`;
-    // set default 9:3-4-1
-    if(opt.match===9 && opt.code==='3-4-1') o.selected = true;
-    sel.appendChild(o);
-  });
-}
-
-// apply formation selection
-function applyFormation(val){
-  const [m,code] = val.split(':');
-  state.matchType = Number(m);
-  state.formation = code;
-  // build onField from formation length (matchType)
-  const count = state.matchType;
-  // ensure enough players exist
-  if(state.players.length < count){
-    // pad bench with placeholders
-    while(state.players.length < count) state.players.push({id:uid(),name:'Sub '+(state.players.length+1),number:'',primary:'CM',secondary:'',classification:'Midfield',minutes:0,priority:false,less:'',notes:''});
-  }
-  // assign first N on field
-  state.onField = state.players.slice(0,count).map(p=>p.id);
-  state.bench = state.players.slice(count).map(p=>p.id);
-  renderPlayersTable();
-  renderField();
-  renderMinutes();
-  updateTimeDisplay();
-  document.getElementById('match-type').value = state.matchType;
-}
-
-/* ---------- RENDER PLAYERS TABLE ---------- */
-function renderPlayersTable(){
-  const tbody = document.querySelector('#players-table tbody');
-  tbody.innerHTML = '';
-  state.players.forEach((p, idx)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>
-        <input value="${escapeHtml(p.name)}" style="width:100%;border:1px solid #eee;padding:6px;border-radius:6px" onchange="editPlayer(${idx},'name',this.value)"/>
-      </td>
-      <td><input value="${p.number}" style="width:64px;border:1px solid #eee;padding:6px;border-radius:6px" onchange="editPlayer(${idx},'number',this.value)"/></td>
-      <td>
-        <select onchange="editPlayer(${idx},'primary',this.value)">
-          ${['GK','CB','LB','RB','CDM','CM','CAM','LW','RW','ST'].map(s=>`<option ${p.primary===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-      </td>
-      <td><input value="${escapeHtml(p.secondary||'')}" onchange="editPlayer(${idx},'secondary',this.value)"/></td>
-      <td>
-        <select onchange="editPlayer(${idx},'classification',this.value)">
-          <option ${p.classification==='Defensive'?'selected':''}>Defensive</option>
-          <option ${p.classification==='Midfield'?'selected':''}>Midfield</option>
-          <option ${p.classification==='Attack'?'selected':''}>Attack</option>
-        </select>
-      </td>
-      <td>
-        <select onchange="editPlayer(${idx},'less',this.value)">
-          <option value="">-</option>
-          <option ${p.less==='Disobedience'?'selected':''}>Disobedience</option>
-          <option ${p.less==='Injury'?'selected':''}>Injury</option>
-          <option ${p.less==='Check Notes'?'selected':''}>Check Notes</option>
-        </select>
-      </td>
-      <td><input value="${escapeHtml(p.notes||'')}" onchange="editPlayer(${idx},'notes',this.value)"/></td>
-      <td><button class="btn small" onclick="removePlayer(${idx})">Remove</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-  saveToLocal();
-}
-
-/* ---------- EDIT / ADD / REMOVE ---------- */
-function addPlayer(){
-  const name = document.getElementById('p-name').value.trim();
-  if(!name) return alert('Enter player name');
-  const number = document.getElementById('p-number').value.trim();
-  const primary = document.getElementById('p-primary').value;
-  const secondary = document.getElementById('p-secondary').value;
-  const classification = document.getElementById('p-class').value;
-  const newP = { id: uid(), name, number, primary, secondary, classification, minutes:0, priority:false, less:'', notes:''};
-  state.players.push(newP);
-  assignInitialField(); // reassign so we keep onField count
-  renderPlayersTable();
-  renderField();
-  renderMinutes();
-  // clear inputs
-  document.getElementById('p-name').value='';
-  document.getElementById('p-number').value='';
-  document.getElementById('p-secondary').value='';
-}
-function editPlayer(i,field,val){
-  if(!state.players[i]) return;
-  state.players[i][field] = val;
-  renderPlayersTable();
-  renderField();
-  renderMinutes();
-}
-function removePlayer(i){
-  if(!confirm('Remove player?')) return;
-  const id = state.players[i].id;
-  state.players.splice(i,1);
-  state.onField = state.onField.filter(x=>x!==id);
-  state.bench = state.bench.filter(x=>x!==id);
-  assignInitialField();
-  renderPlayersTable();
-  renderField();
-  renderMinutes();
-}
-
-/* ---------- Save / Load teams to localStorage ---------- */
-function saveTeam(){
-  const name = document.getElementById('team-save-name').value.trim();
-  if(!name) return alert('Provide a team name');
-  const payload = {players: state.players, formation: state.formation, matchType: state.matchType};
-  localStorage.setItem('hanover_team_'+name, JSON.stringify(payload));
-  alert('Saved team: '+name);
-}
-function saveTeamPrompt(){ const n=prompt('Save team as:','Hanover'); if(n){ document.getElementById('team-save-name').value=n; saveTeam(); } }
-function loadTeamPrompt(){ const n=prompt('Load team name:'); if(!n) return; const data = localStorage.getItem('hanover_team_'+n); if(!data) return alert('No team found by that name'); const payload = JSON.parse(data); state.players = payload.players; state.formation = payload.formation || state.formation; state.matchType = payload.matchType || state.matchType; assignInitialField(); populateFormationSelect(); renderPlayersTable(); renderField(); renderMinutes(); updateTimeDisplay(); alert('Loaded team: '+n); }
-function loadTeam(){ const name = document.getElementById('team-save-name').value.trim(); if(!name) return alert('Provide team name'); const data = localStorage.getItem('hanover_team_'+name); if(!data) return alert('No saved team'); const payload = JSON.parse(data); state.players = payload.players; state.formation = payload.formation || state.formation; state.matchType = payload.matchType || state.matchType; assignInitialField(); populateFormationSelect(); renderPlayersTable(); renderField(); renderMinutes(); updateTimeDisplay(); }
-
-/* ---------- Field rendering and formations coords ---------- */
-// We will compute positional coordinates arrays for 11/9/7 using simple presets
-function formationCoords(matchType, formation){
-  // return array of coords length matchType: {x:%, y:%}
-  if(matchType===11){
-    // default 4-3-3-ish
-    return [{x:50,y:6},{x:18,y:22},{x:82,y:22},{x:12,y:40},{x:88,y:40},{x:30,y:60},{x:70,y:60},{x:20,y:78},{x:50,y:70},{x:80,y:78},{x:50,y:50}].slice(0,11);
-  }
-  if(matchType===9){
-    // for 3-4-1 layout: place GK not shown (we'll still show players). We'll position 9 spots.
-    if(formation==='3-4-1'){
-      return [{x:50,y:8},{x:20,y:30},{x:80,y:30},{x:30,y:52},{x:70,y:52},{x:20,y:74},{x:80,y:74},{x:40,y:86},{x:60,y:86}].slice(0,9);
-    } else {
-      return [{x:50,y:8},{x:25,y:30},{x:75,y:30},{x:35,y:55},{x:65,y:55},{x:30,y:78},{x:70,y:78},{x:50,y:86},{x:50,y:70}].slice(0,9);
+  function addReview() {
+    const input = document.getElementById('reviewInput');
+    const value = input.value.trim();
+    if(value) {
+      const reviewList = document.getElementById('reviewList');
+      const div = document.createElement('div');
+      div.className = 'review';
+      div.textContent = value;
+      reviewList.appendChild(div);
+      input.value = '';
     }
   }
-  // 7v7
-  return [{x:50,y:12},{x:25,y:42},{x:75,y:42},{x:35,y:68},{x:65,y:68},{x:30,y:88},{x:70,y:88}].slice(0,7);
-}
 
-function renderField(){
-  const field = document.getElementById('field');
-  field.innerHTML = '<div class="midline"></div>';
-  const coords = formationCoords(state.matchType, state.formation);
-  // place onField players at positions index 0..N-1 (use coords order)
-  state.onField.forEach((pid, idx)=>{
-    const p = state.players.find(x=>x.id===pid);
-    if(!p) return;
-    const el = document.createElement('div');
-    el.className = 'player';
-    el.draggable = true;
-    el.dataset.id = pid;
-    el.innerHTML = `<div style="text-align:center"><div style="font-size:12px">${p.number||''}</div><div style="font-size:12px">${p.primary}</div></div>`;
-    const pos = coords[idx] || {x:50,y:20+(idx*6)};
-    el.style.left = pos.x + '%';
-    el.style.top = pos.y + '%';
-    el.addEventListener('click', ()=> onFieldClick(pid));
-    el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', pid));
-    field.appendChild(el);
-  });
-  // bench list
-  const bench = document.getElementById('bench-list');
-  bench.innerHTML = '';
-  state.bench.forEach(pid=>{
-    const p = state.players.find(x=>x.id===pid);
-    if(!p) return;
-    const el = document.createElement('div');
-    el.className = 'player small';
-    el.dataset.id = pid;
-    el.textContent = p.number || p.name.split(' ')[0];
-    el.style.background = '#fff';
-    el.draggable = true;
-    el.addEventListener('click', ()=> onBenchClick(pid));
-    el.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', pid));
-    bench.appendChild(el);
-  });
-
-  // list onfield in right column
-  const onlist = document.getElementById('onfield-list');
-  onlist.innerHTML = '';
-  state.onField.forEach(pid=>{
-    const p = state.players.find(x=>x.id===pid);
-    if(!p) return;
-    const row = document.createElement('div');
-    row.className = 'player-row';
-    row.innerHTML = `<div><strong>#${p.number||''} ${p.name}</strong><div class="muted">${p.primary}${p.secondary? ' • '+p.secondary:''}</div></div><div><button class="btn small" onclick="subOut('${pid}')">Sub</button></div>`;
-    onlist.appendChild(row);
-  });
-}
-
-/* ---------- Drag & drop to field ---------- */
-function onFieldDrop(ev){
-  ev.preventDefault();
-  const id = ev.dataTransfer.getData('text/plain');
-  if(!id) return;
-  // if id is from bench, bring into field (swap with last)
-  if(state.bench.includes(id)){
-    if(state.onField.length < state.matchType){
-      // just move
-      state.bench = state.bench.filter(x=>x!==id);
-      state.onField.push(id);
-    } else {
-      // swap with last on field
-      const out = state.onField.pop();
-      state.onField.push(id);
-      state.bench = state.bench.filter(x=>x!==id);
-      state.bench.unshift(out);
-    }
-  } else {
-    // maybe from field to bench
-    if(state.onField.includes(id)){
-      state.onField = state.onField.filter(x=>x!==id);
-      state.bench.unshift(id);
-    }
+  function submitForm(event) {
+    event.preventDefault();
+    alert('Thank you for your message! We will get back to you soon.');
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('message').value = '';
   }
-  renderField(); renderMinutes();
-}
 
-/* ---------- Manual sub functions ---------- */
-function onFieldClick(pid){
-  // ask to sub out
-  if(!confirm('Substitute this player to bench?')) return;
-  state.onField = state.onField.filter(x=>x!==pid);
-  state.bench.unshift(pid);
-  renderField(); renderMinutes(); logEvent('sub out', pid);
-}
-function onBenchClick(pid){
-  if(state.onField.length >= state.matchType){
-    if(!confirm('Field is full. Replace last on-field player?')) return;
-    const out = state.onField.pop();
-    state.onField.push(pid);
-    state.bench = state.bench.filter(x=>x!==pid);
-    state.bench.unshift(out);
-  } else {
-    state.bench = state.bench.filter(x=>x!==pid);
-    state.onField.push(pid);
+  function searchProducts() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const products = document.querySelectorAll('.product');
+    products.forEach(p => {
+      const name = p.getAttribute('data-name').toLowerCase();
+      if(name.includes(input)) {
+        p.style.display = 'flex';
+      } else {
+        p.style.display = 'none';
+      }
+    });
   }
-  renderField(); renderMinutes(); logEvent('sub in', pid);
-}
-function subOut(pid){
-  state.onField = state.onField.filter(x=>x!==pid);
-  state.bench.unshift(pid);
-  renderField(); renderMinutes(); logEvent('sub out', pid);
-}
-
-/* ---------- Minutes display ---------- */
-function renderMinutes(){
-  const container = document.getElementById('players-minutes');
-  container.innerHTML = '';
-  state.players.forEach(p=>{
-    const pct = Math.round((p.minutes / state.durations[state.matchType]) * 100) || 0;
-    const div = document.createElement('div');
-    div.style.marginBottom='8px';
-    div.innerHTML = `<div style="display:flex;align-items:center;gap:8px"><div style="min-width:160px"><strong>#${p.number||''} ${p.name}</strong><div class="muted">${p.primary}${p.secondary? ' • '+p.secondary:''}</div></div><div style="flex:1"><div class="progress"><i style="width:${Math.min(100,pct)}%"></i></div></div><div style="width:56px;text-align:right">${p.minutes.toFixed(1)}m</div></div>`;
-    container.appendChild(div);
-  });
-  // update players table as well
-  renderPlayersTable();
-}
-
-/* ---------- Timekeeping / Simulation core ---------- */
-let tickInterval = null;
-function setSpeed(v){ state.speed = Number(v); if(state.running){ startTick(); } }
-function toggleTimer(){
-  state.running = !state.running;
-  document.getElementById('startBtn').innerText = state.running ? 'Pause' : 'Start';
-  if(state.running) startTick(); else stopTick();
-}
-function startTick(){
-  stopTick();
-  const ms = 1000 / state.speed;
-  tickInterval = setInterval(()=> advanceTime(1), ms);
-}
-function stopTick(){ if(tickInterval) clearInterval(tickInterval); tickInterval=null; }
-function resetMatch(){
-  stopTick();
-  state.timeSec = 0;
-  state.players.forEach(p=>p.minutes = 0);
-  state.running = false;
-  document.getElementById('startBtn').innerText = 'Start';
-  renderMinutes();
-  updateTimeDisplay();
-  state.log = [];
-  document.getElementById('simulation-log').innerHTML = '';
-}
-function advanceTime(seconds){
-  const dur = state.durations[state.matchType]*60;
-  state.timeSec += seconds;
-  if(state.timeSec > dur){ state.timeSec = dur; stopTick(); state.running=false; document.getElementById('startBtn').innerText='Start'; }
-  // add seconds to players on field
-  state.onField.forEach(id=>{
-    const p = state.players.find(x=>x.id===id);
-    if(p) p.minutes += seconds/60;
-  });
-  renderMinutes();
-  updateTimeDisplay();
-  maybeAutoSub(); // auto balancing occasionally
-}
-function updateTimeDisplay(){
-  const durSec = state.durations[state.matchType]*60;
-  const mm = Math.floor(state.timeSec/60).toString().padStart(2,'0');
-  const ss = Math.floor(state.timeSec%60).toString().padStart(2,'0');
-  document.getElementById('time-display').innerText = `${mm}:${ss} / ${state.durations[state.matchType]}:00`;
-  const pct = (state.timeSec / durSec) * 100;
-  document.getElementById('match-progress').style.width = pct + '%';
-}
-
-/* ---------- AI suggestions ---------- */
-function getAISuggestions(){
-  // target equal minutes factoring priority and classification
-  const dur = state.durations[state.matchType];
-  const total = state.players.length;
-  const active = state.onField.length;
-  const base = dur * (active/total);
-  const suggestions = state.players.map(p=>{
-    const boost = p.priority ? 1.1 : 1.0;
-    const target = base * boost;
-    return {id:p.id,name:p.name,current:p.minutes,target};
-  });
-  suggestions.sort((a,b)=> (b.current - b.target) - (a.current - a.target));
-  const out = suggestions.slice(0,6).map(s=>`${s.name}: cur ${s.current.toFixed(1)}m target ${s.target.toFixed(1)}m`);
-  document.getElementById('aiOut') && (document.getElementById('aiOut').innerText = out.join('\\n'));
-  return suggestions;
-}
-function getAISuggestionsSimple(){
-  const sug = getAISuggestions();
-  const over = sug.find(s=> s.current > s.target + 3);
-  const under = [...sug].reverse().find(s=> s.current < s.target - 1);
-  return {over, under, sug};
-}
-function applyAISuggestion(){
-  const {over, under} = getAISuggestionsSimple();
-  if(!over || !under){ alert('No clear suggestion'); return; }
-  // if over on field and under on bench -> swap
-  const overOn = state.onField.includes(over.id);
-  const underOn = state.onField.includes(under.id);
-  if(overOn && !underOn){
-    state.onField = state.onField.map(x=> x===over.id ? under.id : x);
-    state.bench = state.bench.map(x=> x===under.id ? over.id : x);
-    renderField(); renderMinutes(); logEvent('ai-swap', `${over.name} ↔ ${under.name}`);
-  } else {
-    alert('Suggestion requires manual swap');
-  }
-}
-
-/* ---------- Auto substitution heuristic ---------- */
-function maybeAutoSub(){
-  if(!state.running) return;
-  // check every 5 simulated minutes
-  if(Math.floor(state.timeSec/60) % 5 !== 0) return;
-  const suggestions = getAISuggestions();
-  const over = suggestions.find(s=> s.current > s.target + 5);
-  const under = [...suggestions].reverse().find(s=> s.current < s.target - 1);
-  if(over && under && state.onField.includes(over.id) && state.bench.includes(under.id)){
-    // swap
-    state.onField = state.onField.map(x=> x===over.id ? under.id : x);
-    state.bench = state.bench.map(x=> x===under.id ? over.id : x);
-    renderField(); renderMinutes(); logEvent('auto-sub', `${over.name} ↔ ${under.name}`);
-  }
-}
-
-/* ---------- Simulation controls ---------- */
-function startSimulation(){
-  document.getElementById('sim-speed').value = 10;
-  setSpeed(10);
-  if(!state.running) toggleTimer();
-  logEvent('simulation','Started simulation (10x)');
-}
-function pauseSimulation(){ if(state.running) toggleTimer(); logEvent('simulation','Paused'); }
-function logEvent(type,text){
-  state.log.unshift({time: state.timeSec, type, text});
-  const el = document.getElementById('simulation-log');
-  const line = document.createElement('div');
-  line.innerText = `${formatTime(state.timeSec)} • ${type} • ${text}`;
-  el.prepend(line);
-}
-
-/* ---------- CSV export ---------- */
-function exportCSV(){
-  const rows = [['Number','Name','Minutes','Primary','Secondary','Class','PlaysLess','Notes']];
-  state.players.forEach(p=> rows.push([p.number,p.name,p.minutes.toFixed(2),p.primary,p.secondary,p.classification,p.less,p.notes||'']));
-  const csv = rows.map(r=> r.map(c=> `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\\n');
-  const blob = new Blob([csv],{type:'text/csv'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'minutes_report.csv'; a.click(); URL.revokeObjectURL(a.href);
-}
-function exportCSVMinutes(){ exportCSV(); }
-
-/* ---------- Filters ---------- */
-function applyFilters(){
-  const mn = Number(document.getElementById('min-minutes').value||0);
-  const pct = Number(document.getElementById('min-percent').value||0);
-  alert('Filters applied: min minutes '+mn+', min percent '+pct+'% (UI filter only).');
-}
-
-/* ---------- Helpers ---------- */
-function formatTime(sec){
-  const m = Math.floor(sec/60), s = Math.floor(sec%60);
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-/* ---------- Persistence ---------- */
-function saveToLocal(){
-  localStorage.setItem('hanover_state', JSON.stringify({
-    players: state.players, formation: state.formation, matchType: state.matchType
-  }));
-}
-function loadFromLocal(){
-  const txt = localStorage.getItem('hanover_state');
-  if(!txt) return false;
-  try{
-    const obj = JSON.parse(txt);
-    if(obj.players && obj.players.length) {
-      state.players = obj.players;
-      state.formation = obj.formation || state.formation;
-      state.matchType = obj.matchType || state.matchType;
-      assignInitialField();
-      populateFormationSelect();
-      renderPlayersTable();
-      renderField();
-      renderMinutes();
-      updateTimeDisplay();
-      return true;
-    }
-  }catch(e){}
-  return false;
-}
-function resetToSample(){
-  if(!confirm('Reset to sample team from screenshot?')) return;
-  loadSample();
-  saveToLocal();
-}
-
-/* ---------- UI helpers ---------- */
-function go(page){
-  document.querySelectorAll('nav .tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('nav .tab').forEach(t=>{ if(t.dataset.page===page) t.classList.add('active'); });
-  // hide main sections not the tab, but we built pages inside main in sections
-  document.getElementById('home').style.display = (page==='home') ? 'block' : 'none';
-  document.getElementById('page-players').style.display = (page==='players') ? 'block' : 'none';
-  document.getElementById('page-timekeeper').style.display = (page==='timekeeper') ? 'block' : 'none';
-  document.getElementById('page-simulation').style.display = (page==='simulation') ? 'block' : 'none';
-  // settings not separate page, but can be toggled via tab 'settings' by showing players (or home)
-  if(page==='settings') { alert('Settings are available in the right column.'); go('home'); }
-}
-
-/* ---------- Startup ---------- */
-function init(){
-  populateFormationSelect();
-  // set defaults
-  document.getElementById('match-type').value = state.matchType;
-  document.getElementById('sim-speed').value = state.speed;
-  // try load saved
-  const loaded = loadFromLocal();
-  if(!loaded) loadSample();
-  // set default formation select to 9:3-4-1
-  const sel = document.getElementById('formation-select');
-  for(let i=0;i<sel.options.length;i++){
-    if(sel.options[i].value === `${state.matchType}:${state.formation}`) sel.selectedIndex=i;
-  }
-  // show initial pages
-  go('home');
-  // attach global helper functions for inline usage
-  window.addPlayer = addPlayer; window.editPlayer = editPlayer; window.removePlayer = removePlayer;
-  window.saveTeam = saveTeam; window.loadTeam = loadTeam; window.resetToSample = resetToSample;
-  window.setSpeed = setSpeed; window.toggleTimer = toggleTimer; window.resetMatch = resetMatch;
-  window.getAISuggestions = getAISuggestions; window.applyAISuggestion = applyAISuggestion;
-  window.startSimulation = startSimulation; window.pauseSimulation = pauseSimulation; window.exportCSV = exportCSV;
-  window.applyFilters = applyFilters; window.saveTeamPrompt = saveTeamPrompt; window.loadTeamPrompt = loadTeamPrompt;
-  // render
-  renderPlayersTable(); renderField(); renderMinutes(); updateTimeDisplay();
-}
-
-// populate formation select
-function populateFormationSelect(){
-  const sel = document.getElementById('formation-select');
-  sel.innerHTML = '';
-  FORMATION_OPTIONS.forEach(opt=>{
-    const o = document.createElement('option');
-    o.value = `${opt.match}:${opt.code}`;
-    o.textContent = `${opt.code} (${opt.match}v${opt.match===11?11:opt.match})`;
-    sel.appendChild(o);
-  });
-}
-
-/* ---------- small UI wiring ---------- */
-document.getElementById('match-type').addEventListener('change', function(){ changeMatchType(this.value); });
-function changeMatchType(v){
-  state.matchType = Number(v);
-  // choose default formation for that match type if available
-  const defaultForm = FORMATION_OPTIONS.find(x=> x.match===state.matchType);
-  if(defaultForm) state.formation = defaultForm.code;
-  // ensure onField counts match
-  const count = state.matchType;
-  if(state.players.length < count){
-    while(state.players.length < count) state.players.push({id:uid(),name:'Sub '+(state.players.length+1),number:'',primary:'CM',secondary:'',classification:'Midfield',minutes:0,priority:false,less:'',notes:''});
-  }
-  assignInitialField();
-  renderPlayersTable(); renderField(); renderMinutes(); updateTimeDisplay();
-}
-
-// handle field drop already done
-// simple UI: applyFormation wrapper
-function applyFormation(val){ applyFormationInternal(val); }
-function applyFormationInternal(val){
-  const [m,code] = val.split(':');
-  state.matchType = Number(m);
-  state.formation = code;
-  changeMatchType(state.matchType);
-}
-
-// load sample on startup
-init();
-
-/* ---------- small helpers for UI edits ---------- */
-function saveToLocal(){ // override earlier to keep nicer name
-  localStorage.setItem('hanover_state', JSON.stringify({players: state.players, formation: state.formation, matchType: state.matchType}));
-}
-function loadSampleIfNone(){ if(state.players.length===0) loadSample(); }
-
-/* ---------- simple UI shortcuts for sample */ 
-document.addEventListener('keydown', function(e){
-  // ctrl+s save
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); const n=prompt('Team name to save (ctrl+s)'); if(n) { document.getElementById('team-save-name').value=n; saveTeam(); } }
-});
-
-/* ---------- quick AI apply wrapper ---------- */
-function applyAISuggestion(){ applyAISuggestionInternal(); }
-function applyAISuggestionInternal(){ // reuse function earlier but avoid name clash
-  const {over, under} = getAISuggestionsSimple();
-  if(!over || !under){ alert('No clear suggestion'); return; }
-  if(state.onField.includes(over.id) && state.bench.includes(under.id)){
-    state.onField = state.onField.map(x=> x===over.id ? under.id : x);
-    state.bench = state.bench.map(x=> x===under.id ? over.id : x);
-    renderField(); renderMinutes(); logEvent('ai-swap', `${over.name} ↔ ${under.name}`);
-  } else {
-    alert('Suggestion not applicable automatically.');
-  }
-}
-
-// End script
 </script>
+
 </body>
 </html>
